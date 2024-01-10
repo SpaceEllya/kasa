@@ -11,7 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 
-const KuchniaPage = () => {
+const Restauracja = () => {
   
   const navigation = useNavigation();
   const [selectedLink, setSelectedLink] = useState(null);
@@ -21,7 +21,6 @@ const KuchniaPage = () => {
  
 
   const [orderDetails, setOrderDetails] = useState({
-    name: '',
     table: '',
     amount: '',
     time: '',
@@ -101,7 +100,7 @@ const KuchniaPage = () => {
 
       <View style={styles.addBasicInfoContainer}>
         <View style={styles.additionalInfoContainer}>
-          <Text style={styles.additionalInfoText}>Zamówienia</Text>
+          <Text style={styles.additionalInfoText}>Menu</Text>
           <View style={styles.InfoBox}>
             <View style={styles.additionalInfoBox}>
               <View style={styles.additionalInfoBoxSecond}>
@@ -111,50 +110,31 @@ const KuchniaPage = () => {
                     style={styles.additionalInfoBoxSecondbackgroundImage}
                   />
                   <View style={styles.itionalInfoBoxSecondInfoText}>
-                    <Text style={styles.infoBoxSecondInfoText}>Krewetki</Text>
+                    <Text style={styles.infoBoxSecondInfoText}>Dania Główne</Text>
                     <Text style={styles.infoBoxSecondInfoTextSecond}>
-                      Opis potrawy uwagi na jej temat etc.
+                    Kucharz
                     </Text>
                   </View>
                   <TouchableOpacity
                     onPress={() => setTooltipVisible(true)}
                     onPressOut={() => setTooltipVisible(false)}
-                  >
-                    <Image
-                      source={require('./assets/expectation.png')}
-                      style={styles.additionalInfoBoxSecondImage}
-                    />
+                    >
+                    
                   </TouchableOpacity>
                 </View>
                 <View style={styles.additionalInfoBoxSecondRowTwo}>
                   <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Stolik</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>12</Text>
+                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Ilość pozycji</Text>
+                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>16</Text>
                   </View>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Time</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>9:30am - 10:00am</Text>
-                  </View>
-                </View>
-                <View style={styles.additionalInfoBoxSecondRowTwo}>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kwota</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>120$</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kelner</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>Matra Grabarska</Text>
-                  </View>
+                  
                 </View>
               </View>
 
               <View style={styles.additionalInfoBoxEdit}>
-                <TouchableOpacity onPress={() => handleCancelBookingPress()}>
-                  <Text style={styles.additionalInfoBoxEditSecond}>Cancel Booking</Text>
-                </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => handleModifyPress()}>
-                  <Text style={styles.additionalInfoBoxEditSecond}>Modify</Text>
+                  <Text style={styles.additionalInfoBoxEditSecond}>Edytuj Kategorię</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -162,62 +142,35 @@ const KuchniaPage = () => {
         </View>
       </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isTooltipVisible}
-        onRequestClose={() => setTooltipVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Status</Text>
-            <Text style={styles.modalTextTwo}>Krewetki</Text>
-            <Text style={styles.modalTextTree}>UWAGI, ALERGENY</Text>
-            <TouchableOpacity onPress={() => setTooltipVisible(false)}>
-              <Text style={styles.modalCloseButton}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      
 
       <Modal animationType="slide" transparent={true} visible={isModalVisible} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Dodaj Nowe Zamówienie</Text>
+            <Text style={styles.modalText}>Dodaj Kategorię</Text>
 
             <TextInput
               style={styles.modalInput}
-              placeholder="Nazwa"
-              value={orderDetails.name}
-              onChangeText={(text) => handleInputChange('name', text)}
-            />
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Stolik"
+              placeholder="Kategoria"
               value={orderDetails.table}
               onChangeText={(text) => handleInputChange('table', text)}
             />
             <TextInput
               style={styles.modalInput}
-              placeholder="Kwota"
+              placeholder="Kucharz"
               value={orderDetails.amount}
               onChangeText={(text) => handleInputChange('amount', text)}
             />
             <TextInput
               style={styles.modalInput}
-              placeholder="Czas"
+              placeholder="Ilość pozycji"
               value={orderDetails.time}
               onChangeText={(text) => handleInputChange('time', text)}
             />
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Zamówienie"
-              value={orderDetails.order}
-              onChangeText={(text) => handleInputChange('order', text)}
-            />
+           
 
             <TouchableOpacity onPress={handleAddOrder}>
-              <Text style={styles.modalAddOrderButton}>Dodaj Zamówienie</Text>
+              <Text style={styles.modalAddOrderButton}>Dodaj Kategorię</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleModalClose}>
@@ -229,7 +182,7 @@ const KuchniaPage = () => {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={handleAddOrderPress} style={styles.changeUserButtonTwo}>
-          <Text style={styles.changeUserButtonTextTwo}>Dodaj nowe zamówienie</Text>
+          <Text style={styles.changeUserButtonTextTwo}>Dodaj Kategorię</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -399,7 +352,7 @@ const styles = StyleSheet.create({
 
   },
   itionalInfoBoxSecondInfo:{
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'row',
     
@@ -417,19 +370,22 @@ const styles = StyleSheet.create({
   },
   infoBoxSecondInfoText:{
     fontSize:18,
+    marginLeft:20,
     fontWeight: 'light',
     color: '#000618',
 
   },
   infoBoxSecondInfoTextSecond:{
     fontSize:14,
+    marginLeft:20,
     fontWeight: 'light',
     color: '#646567',
 
   },
   additionalInfoBoxSecondRowTwo:{
     marginTop:20,
-    justifyContent: 'space-around',
+    marginLeft:40,
+    justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'row',
   },
@@ -505,7 +461,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     alignItems: 'center',
-    width: '60%', // Увеличил ширину до 80%
+    width: '60%', // Увеличил ширину до 60%
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
@@ -542,4 +498,5 @@ const styles = StyleSheet.create({
 });
   
 
-export default KuchniaPage;
+
+export default Restauracja;

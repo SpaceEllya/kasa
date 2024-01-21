@@ -17,8 +17,11 @@ const Restauracja = () => {
   const [selectedLink, setSelectedLink] = useState(null);
   const [isTooltipVisible, setTooltipVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isProfileModalVisible, setProfileModalVisible] = useState(false);
 
- 
+  const toggleProfileModal = () => {
+    setProfileModalVisible(!isProfileModalVisible);
+  };
 
   const [orderDetails, setOrderDetails] = useState({
     table: '',
@@ -87,7 +90,30 @@ const Restauracja = () => {
         </TouchableOpacity>
       </View>
           <Image source={require('./assets/call.png')} style={styles.icon} />
-          <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
+          <TouchableOpacity onPress={toggleProfileModal}>
+        <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
+      </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isProfileModalVisible}
+        onRequestClose={toggleProfileModal}
+      >
+        <View style={styles.profileModalContainer}>
+          <View style={styles.profileModalContent}>
+            <TouchableOpacity onPress={() => handleLinkPress('Profile')}>
+              <Text style={styles.profileModalLink}>Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLinkPress('LogOut')}>
+              <Text style={styles.profileModalLink}>Log out</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleProfileModal}>
+              <Text style={styles.profileModalCloseButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
         </View>
 
         <View style={styles.userInfoContainer}>
@@ -493,6 +519,36 @@ const styles = StyleSheet.create({
   modalCloseButton: {
     color: 'blue',
     fontSize: 16,
+  },
+
+  profileImage: {
+    width: 40,
+    height: 40,
+    marginLeft: 10,
+    borderRadius: 20,
+  },
+  profileModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  profileModalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  profileModalLink: {
+    fontSize: 16,
+    fontWeight: 'light',
+    marginBottom: 10,
+    color: 'black', // Цвет ссылок (можете настроить под ваш дизайн)
+  },
+  profileModalCloseButton: {
+    color: 'blue',
+    fontSize: 16,
+    marginTop: 10,
   },
 
 });

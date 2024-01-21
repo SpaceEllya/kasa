@@ -17,6 +17,54 @@ const KuchniaPage = () => {
   const [selectedLink, setSelectedLink] = useState(null);
   const [isTooltipVisible, setTooltipVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isProfileModalVisible, setProfileModalVisible] = useState(false);
+  const [isBookingCancelled, setBookingCancelled] = useState(false);
+  const [isModifyModalVisible, setModifyModalVisible] = useState(false);
+
+
+  
+  
+
+  const [mealDetails, setMealDetails] = useState({
+    name: 'Krewetki',
+    description: 'Opis potrawy uwagi na jej temat etc.',
+    table: '12',
+    time: '9:30am - 10:00am',
+    amount: '120$',
+    waiter: 'Matra Grabarska',
+  });
+ 
+
+  const toggleModifyModal = () => {
+    setModifyModalVisible(!isModifyModalVisible);
+  };
+  
+  const handleCancelBookingPress = () => {
+    // Добавьте любую логику, которая может быть необходима перед отменой бронирования
+    // ...
+  
+    // Устанавливаем состояние для скрытия таблички
+    setBookingCancelled(true);
+  };
+
+  const handleModifyPress = () => {
+    // Открываем модальное окно для редактирования
+    setModifyModalVisible(true);
+  };
+
+  const handleSaveChanges = () => {
+    setMealDetails(prevMealDetails => ({
+      ...prevMealDetails,
+      name: 'Nowe danie',
+      description: 'Nowy opis dania',
+      table: 'Nowy stolik',
+      time: 'Nowy czas',
+      amount: 'Nowa kwota',
+      waiter: 'Nowy kelner',
+    }));
+    setModifyModalVisible(false);
+  };
+  
 
  
 
@@ -28,13 +76,16 @@ const KuchniaPage = () => {
     order: '',
   });
 
-  const handleCancelBookingPress = () => {
-    console.log('Cancel Booking pressed...');
-  };
 
-  const handleModifyPress = () => {
-    console.log('Modify pressed...');
-  };
+  const [archiveOrders, setArchiveOrders] = useState([
+    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
+    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
+    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
+    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
+  ]);
+  
+  
+
   
 
   const handleChangeUser = () => {
@@ -44,6 +95,7 @@ const KuchniaPage = () => {
   const handleLinkPress = (screenName) => {
     navigation.navigate(screenName);
     setSelectedLink(screenName);
+  
   };
 
   const handleAddOrderPress = () => {
@@ -61,6 +113,18 @@ const KuchniaPage = () => {
 
   const handleInputChange = (field, value) => {
     setOrderDetails((prevDetails) => ({ ...prevDetails, [field]: value }));
+  };
+
+
+  const handleLogout = () => {
+    // Ваш код для выхода из системы
+    console.log('User logged out');
+  };
+
+ 
+
+  const toggleProfileModal = () => {
+    setProfileModalVisible(!isProfileModalVisible);
   };
 
   return (
@@ -88,7 +152,32 @@ const KuchniaPage = () => {
         </TouchableOpacity>
       </View>
           <Image source={require('./assets/call.png')} style={styles.icon} />
-          <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
+
+          <TouchableOpacity onPress={toggleProfileModal}>
+        <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
+      </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isProfileModalVisible}
+        onRequestClose={toggleProfileModal}
+      >
+        <View style={styles.profileModalContainer}>
+          <View style={styles.profileModalContent}>
+            <TouchableOpacity onPress={() => handleLinkPress('Profile')}>
+              <Text style={styles.profileModalLink}>Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLinkPress('LogOut')}>
+              <Text style={styles.profileModalLink}>Log out</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleProfileModal}>
+              <Text style={styles.profileModalCloseButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
         </View>
 
         <View style={styles.userInfoContainer}>
@@ -102,65 +191,128 @@ const KuchniaPage = () => {
       <View style={styles.addBasicInfoContainer}>
         <View style={styles.additionalInfoContainer}>
           <Text style={styles.additionalInfoText}>Zamówienia</Text>
+          {!isBookingCancelled && (
           <View style={styles.InfoBox}>
+            
             <View style={styles.additionalInfoBox}>
               <View style={styles.additionalInfoBoxSecond}>
-                <View style={styles.itionalInfoBoxSecondInfo}>
-                  <Image
-                    source={require('./assets/user_profile.png')}
-                    style={styles.additionalInfoBoxSecondbackgroundImage}
-                  />
-                  <View style={styles.itionalInfoBoxSecondInfoText}>
-                    <Text style={styles.infoBoxSecondInfoText}>Krewetki</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecond}>
-                      Opis potrawy uwagi na jej temat etc.
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => setTooltipVisible(true)}
-                    onPressOut={() => setTooltipVisible(false)}
-                  >
-                    <Image
-                      source={require('./assets/expectation.png')}
-                      style={styles.additionalInfoBoxSecondImage}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.additionalInfoBoxSecondRowTwo}>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Stolik</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>12</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Time</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>9:30am - 10:00am</Text>
-                  </View>
-                </View>
-                <View style={styles.additionalInfoBoxSecondRowTwo}>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kwota</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>120$</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kelner</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>Matra Grabarska</Text>
-                  </View>
-                </View>
+              <View style={styles.itionalInfoBoxSecondInfo}>
+  <Image
+    source={require('./assets/user_profile.png')}
+    style={styles.additionalInfoBoxSecondbackgroundImage}
+  />
+  <View style={styles.itionalInfoBoxSecondInfoText}>
+    <Text style={styles.infoBoxSecondInfoText}>{mealDetails.name}</Text>
+    <Text style={styles.infoBoxSecondInfoTextSecond}>{mealDetails.description}</Text>
+  </View>
+  <TouchableOpacity
+    onPress={() => setTooltipVisible(true)}
+    onPressOut={() => setTooltipVisible(false)}
+  >
+    <Image
+      source={require('./assets/expectation.png')}
+      style={styles.additionalInfoBoxSecondImage}
+    />
+  </TouchableOpacity>
+</View>
+<View style={styles.additionalInfoBoxSecondRowTwo}>
+  <View>
+    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Stolik</Text>
+    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.table}</Text>
+  </View>
+  <View>
+    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Time</Text>
+    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.time}</Text>
+  </View>
+</View>
+<View style={styles.additionalInfoBoxSecondRowTwo}>
+  <View>
+    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kwota</Text>
+    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.amount}</Text>
+  </View>
+  <View>
+    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kelner</Text>
+    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.waiter}</Text>
+  </View>
+</View>
               </View>
 
               <View style={styles.additionalInfoBoxEdit}>
-                <TouchableOpacity onPress={() => handleCancelBookingPress()}>
-                  <Text style={styles.additionalInfoBoxEditSecond}>Cancel Booking</Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => handleModifyPress()}>
-                  <Text style={styles.additionalInfoBoxEditSecond}>Modify</Text>
-                </TouchableOpacity>
-              </View>
+    <>
+      <TouchableOpacity onPress={() => handleCancelBookingPress()}>
+        <Text style={styles.additionalInfoBoxEditSecond}>Cancel Booking</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => handleModifyPress()}>
+        <Text style={styles.additionalInfoBoxEditSecond}>Modify</Text>
+      </TouchableOpacity>
+    </>
+
+  </View>
+
             </View>
           </View>
+            )}
         </View>
+        
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModifyModalVisible}
+        onRequestClose={toggleModifyModal}
+      >
+        <View style={styles.modifyModalContainer}>
+          <View style={styles.modifyModalContent}>
+           
+            <TextInput
+  style={styles.modifyModalInput}
+  placeholder="Nowe danie"
+  value={mealDetails.name}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, name: text })}
+/>
+<TextInput
+  style={styles.modifyModalInput}
+  placeholder="Nowy opis dania"
+  value={mealDetails.description}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, description: text })}
+/>
+<TextInput
+  style={styles.modifyModalInput}
+  placeholder="Nowy stolik"
+  value={mealDetails.table}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, table: text })}
+/>
+<TextInput
+  style={styles.modifyModalInput}
+  placeholder="Nowy czas"
+  value={mealDetails.time}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, time: text })}
+/>
+<TextInput
+  style={styles.modifyModalInput}
+  placeholder="Nowa kwota"
+  value={mealDetails.amount}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, amount: text })}
+/>
+<TextInput
+  style={styles.modifyModalInput}
+  placeholder="Nowy kelner"
+  value={mealDetails.waiter}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, waiter: text })}
+/>
+
+<TouchableOpacity onPress={handleSaveChanges}>
+              <Text style={styles.modifyModalSaveButton}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleModifyModal}>
+              <Text style={styles.modifyModalCloseButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         animationType="slide"
@@ -232,7 +384,26 @@ const KuchniaPage = () => {
           <Text style={styles.changeUserButtonTextTwo}>Dodaj nowe zamówienie</Text>
         </TouchableOpacity>
       </View>
+      
+
+      <View style={styles.addСontainerArchiveOrders}>
+  <Text style={styles.additionalInfoText}>Archiwum zamówień</Text>
+  <View style={styles.archiveOrdersContainer}>
+    {archiveOrders.map((order, index) => (
+      <View key={index} style={styles.archiveOrderContainer}>
+        <Text style={styles.archiveOrderText}>{`Kelner: ${order.waiter}`}</Text>
+        <Text style={styles.archiveOrderText}>{`Zamówienia: ${order.name}`}</Text>
+        <Text style={styles.archiveOrderText}>{`Stolik: ${order.table}`}</Text>
+        <Text style={styles.archiveOrderText}>{`Czas: ${order.time}`}</Text>
+        <Text style={styles.archiveOrderText}>{`Suma: ${order.amount}`}</Text>
+      </View>
+    ))}
+  </View>
+</View>
+
+
     </View>
+    
   );
 };
 
@@ -538,6 +709,103 @@ const styles = StyleSheet.create({
     color: 'blue',
     fontSize: 16,
   },
+
+  profileImage: {
+    width: 40,
+    height: 40,
+    marginLeft: 10,
+    borderRadius: 20,
+  },
+  profileModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  profileModalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  profileModalLink: {
+    fontSize: 16,
+    fontWeight: 'light',
+    marginBottom: 10,
+    color: 'black', // Цвет ссылок (можете настроить под ваш дизайн)
+  },
+  profileModalCloseButton: {
+    color: 'blue',
+    fontSize: 16,
+    marginTop: 10,
+  },
+
+  additionalInfoBoxEditSecond: {
+    fontSize: 15,
+    fontWeight: 'light',
+    color: '#FFF',
+    marginBottom: 10,
+  },
+  modifyModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modifyModalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modifyModalInput: {
+    width: '100%',
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    paddingLeft: 10,
+  },
+  modifyModalSaveButton: {
+    backgroundColor: '#FA8E4D',
+    color: '#fff',
+    fontSize: 16,
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  modifyModalCloseButton: {
+    color: 'blue',
+    fontSize: 16,
+  },
+
+  archiveOrdersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+    justifyContent: 'space-around',
+  },
+  
+  archiveOrderContainer: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 10,
+    margin: 5,
+    width: '48%', // Чтобы вмещать два заказа в ряд
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#000',
+  },
+  
+  archiveOrderText: {
+    fontSize: 14,
+    marginBottom: 5,
+    color: '#000618',
+  },
+  
+  
 
 });
   

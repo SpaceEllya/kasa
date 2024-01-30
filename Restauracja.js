@@ -18,6 +18,20 @@ const Restauracja = () => {
   const [isTooltipVisible, setTooltipVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+
+  const toggleLogoutModal = () => {
+    setLogoutModalVisible(!isLogoutModalVisible);
+  };
+
+  const handleLogout = () => {
+    toggleLogoutModal();
+  };
+
+  const handleLogoutConfirmed = () => {
+    console.log('User logged out');
+    toggleLogoutModal();
+  };
 
   const toggleProfileModal = () => {
     setProfileModalVisible(!isProfileModalVisible);
@@ -71,13 +85,13 @@ const Restauracja = () => {
       <View style={styles.contentContainer}>
         <View style={styles.header}>
           <Image source={require('./assets/logo.png')} style={styles.logo} />
-          <View style={styles.searchContainer}>
-            <Image source={require('./assets/search.png')} style={styles.searchIcon} />
-            <TextInput style={styles.searchInput} placeholder="Search..." placeholderTextColor="#666B78" />
-          </View>
+          
           <View style={styles.headerTextContainer}>
         <TouchableOpacity onPress={() => handleLinkPress('KuchniaPage')}>
-          <Text style={[styles.headerLink, selectedLink === 'KuchniaPage' && styles.selectedLink]}>Kuchnia</Text>
+          <Text style={[styles.headerLink, selectedLink === 'KuchniaPage' && styles.selectedLink]}>Zamówienia</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleLinkPress('Kuchnia')}>
+          <Text style={[styles.headerLink, selectedLink === 'Kuchnia' && styles.selectedLink]}>Kuchnia</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleLinkPress('ZarzadzaniePage')}>
           <Text style={[styles.headerLink, selectedLink === 'ZarzadzaniePage' && styles.selectedLink]}>Zarządzanie</Text>
@@ -88,32 +102,33 @@ const Restauracja = () => {
         <TouchableOpacity onPress={() => handleLinkPress('Kategorie')}>
           <Text style={[styles.headerLink, selectedLink === 'Kategorie' && styles.selectedLink]}>Kategorie</Text>
         </TouchableOpacity>
-      </View>
-          <Image source={require('./assets/call.png')} style={styles.icon} />
+
+        <Image source={require('./assets/call.png')} style={styles.icon} />
           <TouchableOpacity onPress={toggleProfileModal}>
         <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
-      </TouchableOpacity>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isProfileModalVisible}
-        onRequestClose={toggleProfileModal}
-      >
-        <View style={styles.profileModalContainer}>
-          <View style={styles.profileModalContent}>
-            <TouchableOpacity onPress={() => handleLinkPress('Profile')}>
-              <Text style={styles.profileModalLink}>Profile</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleLinkPress('LogOut')}>
-              <Text style={styles.profileModalLink}>Log out</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={toggleProfileModal}>
-              <Text style={styles.profileModalCloseButton}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+          </TouchableOpacity>
+      </View>
+ 
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isProfileModalVisible}
+            onRequestClose={toggleProfileModal}
+          >
+            <View style={styles.profileModalContainer}>
+              <View style={styles.profileModalContent}>
+                <TouchableOpacity onPress={() => handleLinkPress('Profile')}>
+                  <Text style={styles.profileModalLink}>Profile</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLogout}>
+                  <Text style={styles.profileModalLink}>Log out</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={toggleProfileModal}>
+                  <Text style={styles.profileModalCloseButton}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </View>
 
         <View style={styles.userInfoContainer}>
@@ -167,6 +182,25 @@ const Restauracja = () => {
           </View>
         </View>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isLogoutModalVisible}
+        onRequestClose={toggleLogoutModal}
+      >
+        <View style={styles.profileModalContainer}>
+          <View style={styles.profileModalContent}>
+            <Text style={styles.profileModalLink}>Are you sure you want to log out?</Text>
+            <TouchableOpacity onPress={handleLogoutConfirmed}>
+              <Text style={styles.profileModalLink}>Yes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleLogoutModal}>
+              <Text style={styles.profileModalLink}>No</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       
 
@@ -239,26 +273,7 @@ const styles = StyleSheet.create({
     height: 40,
     marginRight: 30,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#FFF',
-    backgroundColor: '#FFF',
-    width: 300,
-    height: 35,
-    borderRadius: 10,
-    padding: 5,
-    marginRight: 20,
-  },
-  searchIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 5,
-  },
-  searchInput: {
-    flex: 1,
-    color: '#000',
-  },
+
   headerTextContainer: {
     flexDirection: 'row',
     alignItems: 'center',

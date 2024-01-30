@@ -6,6 +6,7 @@ import KuchniaPage from './KuchniaPage';
 import ZarzadzaniePage from './ZarzadzaniePage';  // Добавлено новое импортирование
 import Restauracja from './Restauracja';
 import Kategorie from './Kategorie';
+import Kuchnia from './Kuchnia';
 
 
 const Stack = createStackNavigator();
@@ -17,6 +18,7 @@ const AppNavigator = () => {
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="KuchniaPage" component={KuchniaPage} />
+        <Stack.Screen name="Kuchnia" component={Kuchnia} />
         <Stack.Screen name="ZarzadzaniePage" component={ZarzadzaniePage} />  
         <Stack.Screen name="Restauracja" component={Restauracja} />  
         <Stack.Screen name="Kategorie" component={Kategorie} />  

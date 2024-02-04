@@ -19,7 +19,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="KuchniaPage" component={KuchniaPage} />
         <Stack.Screen name="Kuchnia" component={Kuchnia} />
-        <Stack.Screen name="ZarzadzaniePage" component={ZarzadzaniePage} />  
+        <Stack.Screen name="ZarzadzaniePage" component={ZarzadzaniePage} />
         <Stack.Screen name="Restauracja" component={Restauracja} />  
         <Stack.Screen name="Kategorie" component={Kategorie} />  
       </Stack.Navigator>

@@ -10,8 +10,12 @@ import {
   FlatList,
   Picker,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import MessagesNotification from './MessagesNotification';
+
+const useForceUpdate = () => useState()[1];
 
 const Kuchnia = () => {
   const navigation = useNavigation();
@@ -24,8 +28,37 @@ const Kuchnia = () => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [filter, setFilter] = useState('');
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+
+  const [isMessagesNotificationVisible, setMessagesNotificationVisible] = useState(false);
+
+
+
+  const [notifications, setNotifications] = useState([]);
+
+  // Function to open the notification modal
+  const handleOpenMessagesNotification = () => {
+    setMessagesNotificationVisible(true);
+  };
+
+  // Function to handle user selection from notification
+  const handleSelectUserFromNotification = (userId) => {
+    // Handle user selection from notification
+    console.log('Selected user ID:', userId);
+  };
+
+  // Function to send a new notification
+  const sendNotification = (orderNumber, dishName, newStatus) => {
+    const newNotification = {
+      message: `Zamowienie: ${orderNumber}\nNazwa: ${dishName}\nStatus: ${newStatus}`,
+      read: false,
+    };
+    setNotifications((prevNotifications) => [...prevNotifications, newNotification]);
+    handleOpenMessagesNotification();
+  };
+
 
   const toggleLogoutModal = () => {
     setLogoutModalVisible(!isLogoutModalVisible);
@@ -38,7 +71,9 @@ const Kuchnia = () => {
   const handleLogoutConfirmed = () => {
     console.log('User logged out');
     toggleLogoutModal();
+    navigation.navigate('LoginPage');
   };
+
 
   const handleSortOrderChange = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -79,33 +114,35 @@ const Kuchnia = () => {
     console.log('Cancel Booking pressed...');
   };
 
-  const handleStatusChange = (orderIndex) => {
-    // Implement the logic to change the status here
-    console.log('Changing status for order at index:', orderIndex);
-  };
-
   const [orders, setOrders] = useState([
     {
       numerZamowienia: '1',
       nazwaDania: 'Danie 1',
       uwagi: '-',
-      oczekiwanie: 'Nadal przygotowywane',
+      oczekiwanie: 'W trakcie',
       time: '15:01',
     },
     {
       numerZamowienia: '2',
       nazwaDania: 'Danie 2',
-      uwagi: 'Z ostrą papryką',
+      uwagi: 'Z ostrą papryką Changing status for order at index Changing status for order at index Changing status for order at index Changing status for order at index ',
       oczekiwanie: 'Gotowe',
       time: '14:00',
     },
     // Add more orders as needed
   ]);
 
+  const [selectedOrderIndex, setSelectedOrderIndex] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+
   useEffect(() => {
     setFilteredOrders(getSortedAndFilteredOrders());
   }, [filter, selectedCategory, sortOrder]);
 
+  useEffect(() => {
+    setOrders(getSortedAndFilteredOrders());
+  }, [filter, selectedCategory, sortOrder, newStatus]);
+  
   const handleChangeUser = () => {
     console.log('Changing user...');
   };
@@ -132,6 +169,32 @@ const Kuchnia = () => {
     setOrderDetails((prevDetails) => ({ ...prevDetails, [field]: value }));
   };
 
+  const handleStatusChange = (orderIndex) => {
+    console.log('Selected Order Index:', orderIndex);
+    setSelectedOrderIndex(orderIndex);
+    setNewStatus(orders[orderIndex].oczekiwanie);
+    setTooltipVisible(true);
+  };
+  
+
+  const handleSaveStatusChange = () => {
+    if (newStatus.trim() !== '') {
+      const updatedOrders = [...orders];
+      updatedOrders[selectedOrderIndex] = {
+        ...updatedOrders[selectedOrderIndex],
+        oczekiwanie: newStatus,
+      };
+      setOrders(updatedOrders);
+      setTooltipVisible(false);
+    }
+  };
+  
+  
+
+  const handleCancelStatusChange = () => {
+    setTooltipVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <Image source={require('./assets/background-image_2.png')} style={styles.backgroundImage} />
@@ -154,7 +217,17 @@ const Kuchnia = () => {
             <TouchableOpacity onPress={() => handleLinkPress('Kategorie')}>
               <Text style={[styles.headerLink, selectedLink === 'Kategorie' && styles.selectedLink]}>Kategorie</Text>
             </TouchableOpacity>
-            <Image source={require('./assets/call.png')} style={styles.icon} />
+
+            <TouchableOpacity onPress={handleOpenMessagesNotification}>
+        <Image source={require('./assets/call.png')} style={styles.icon} />
+        <MessagesNotification
+          isVisible={isMessagesNotificationVisible}
+          onClose={() => setMessagesNotificationVisible(false)}
+          notifications={notifications}
+          onUserSelect={handleSelectUserFromNotification}
+        />
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={toggleProfileModal}>
               <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
             </TouchableOpacity>
@@ -167,9 +240,6 @@ const Kuchnia = () => {
           >
             <View style={styles.profileModalContainer}>
               <View style={styles.profileModalContent}>
-                <TouchableOpacity onPress={() => handleLinkPress('Profile')}>
-                  <Text style={styles.profileModalLink}>Profile</Text>
-                </TouchableOpacity>
                 <TouchableOpacity onPress={handleLogout}>
                   <Text style={styles.profileModalLink}>Log out</Text>
                 </TouchableOpacity>
@@ -220,14 +290,14 @@ const Kuchnia = () => {
                   keyExtractor={(item) => item.numerZamowienia.toString()}
                   renderItem={({ item, index }) => (
                     <View style={styles.orderItem}>
-                      <Text style={styles.orderText}>{`Numer zamówienia: ${item.numerZamowienia}`}</Text>
-                      <Text style={styles.orderText}>{`Nazwa dania: ${item.nazwaDania}`}</Text>
+                      <Text style={styles.orderText}>{`Zamówienie: ${item.numerZamowienia}`}</Text>
+                      <Text style={styles.orderText}>{`Nazwa: ${item.nazwaDania}`}</Text>
                       <Text style={styles.orderText}>{`Uwagi: ${item.uwagi}`}</Text>
-                      <Text style={styles.orderText}>{`Oczekiwanie: ${item.oczekiwanie}`}</Text>
+                      <Text style={styles.orderText}>{`Status: ${item.oczekiwanie}`}</Text>
                       <Text style={styles.orderText}>{`Czas: ${item.time}`}</Text>
 
                       <TouchableOpacity onPress={() => handleStatusChange(index)} style={styles.statusChangeButton}>
-                        <Text>Zmień status</Text>
+                        <Text style={styles.statusChangeButtonText}>Zmień status</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -256,10 +326,40 @@ const Kuchnia = () => {
           </View>
         </View>
       </Modal>
-      
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isTooltipVisible}
+        onRequestClose={() => setTooltipVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Zmień status</Text>
+            <Picker
+              selectedValue={newStatus}
+              onValueChange={(itemValue) => setNewStatus(itemValue)}
+              style={styles.pickerStyle}
+            >
+              <Picker.Item label="W trakcie" value="W trakcie" />
+              <Picker.Item label="Gotowe" value="Gotowe" />
+              {/* Добавьте другие статусы по мере необходимости */}
+            </Picker>
+            <View style={styles.modalButtonsContainer}>
+              <TouchableOpacity onPress={handleSaveStatusChange}>
+                <Text style={styles.modalAddButton}>Zapisz</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleCancelStatusChange}>
+                <Text style={styles.modalCloseButton}>Anuluj</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -315,14 +415,17 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     borderRadius: 20,
   },
+
   orderItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     paddingBottom: 10,
     marginBottom: 10,
+    
   },
+  
+    
   changeUserButtonTwo: {
     borderColor: '#000',
     borderRadius: 10,
@@ -339,6 +442,7 @@ const styles = StyleSheet.create({
   },
   additionalInfoContainer: {
     width: '100%',
+    height:'100%',
     marginTop: 20,
   },
   additionalInfoText: {
@@ -348,7 +452,7 @@ const styles = StyleSheet.create({
   },
   additionalInfoBox: {
     width: '100%',
-    height: 400,
+    height: '100%',
     backgroundColor: '#FA8E4D',
     marginTop: 20,
     borderRadius: 10,
@@ -360,7 +464,7 @@ const styles = StyleSheet.create({
   },
   additionalInfoBoxSecond: {
     width: '100%',
-    height: 390,
+    height: '90%',
     backgroundColor: '#FFF',
     borderRadius: 10,
     shadowOpacity: 0.1,
@@ -449,6 +553,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
+    alignItems: 'center',
+    margin:10,
   },
   modalCloseButton: {
     color: '#FA8E4D',
@@ -463,6 +569,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
+    
   },
   profileModalContainer: {
     flex: 1,
@@ -498,15 +605,31 @@ const styles = StyleSheet.create({
   },
   statusChangeButton: {
     backgroundColor: '#FA8E4D',
-    color: '#fff',
-    fontSize: 14,
-    padding: 5,
+    color: 'white',
+    padding: 10,
     borderRadius: 5,
-    marginTop: 5,
+    alignItems:'center',
+    justifyContent:'center',
+  },
+
+  statusChangeButtonText: {
+    color: 'white',
+    fontSize: 14,
+
   },
   addBasicInfoContainer: {
     width: '70%',
+    height:'85%',
   },
+  orderText: {
+    fontSize: 16,
+    width: '100%', // Ширина текста 100%
+    marginRight: 10, // Добавленный отступ между текстовыми блоками
+  },
+  InfoBox:{
+    height:'70%',
+    width:'100%',
+  }
 
 });
 

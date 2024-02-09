@@ -7,9 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
+  FlatList,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import PermissionsModal from './PermissionsModal';
+import UserSelectionModal from './UserSelectionModal';
+import MessagesNotification from './MessagesNotification';
+
 
 const KuchniaPage = () => {
   const navigation = useNavigation();
@@ -20,6 +25,89 @@ const KuchniaPage = () => {
   const [isBookingCancelled, setBookingCancelled] = useState(false);
   const [isModifyModalVisible, setModifyModalVisible] = useState(false);
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+  
+  const [isUserSelectionModalVisible, setUserSelectionModalVisible] = useState(false);
+  const [isAddOrderModalVisible, setAddOrderModalVisible] = useState(false);
+
+  const [isMessagesNotificationVisible, setMessagesNotificationVisible] = useState(false);
+
+  const [selectedOrderForModification, setSelectedOrderForModification] = useState(null);
+
+
+
+
+  // Добавьте функцию открытия уведомлений
+  const handleOpenMessagesNotification = () => {
+    setMessagesNotificationVisible(true);
+  };
+
+  // Добавьте функцию выбора пользователя из уведомлений
+  const handleSelectUserFromNotification = (userId) => {
+    // Ваш код для обработки выбранного пользователя
+    // Например, перейти на экран чата с этим пользователем
+    console.log('Selected user ID:', userId);
+  };
+  
+  
+  
+  const handleModifyPress = (orderId) => {
+    const selectedOrder = orders.find((order) => order.id === orderId);
+    if (selectedOrder) {
+      setSelectedOrderForModification(selectedOrder);
+      setMealDetails({
+        name: selectedOrder.name,
+        order: selectedOrder.order,
+        table: selectedOrder.table,
+        time: selectedOrder.time,
+        amount: selectedOrder.amount,
+        waiter: selectedOrder.waiter,
+      });
+      setModifyModalVisible(true);
+    }
+  };
+  
+  
+  const handleSaveChanges = () => {
+    // Update the selected order with new details
+    setOrders((prevOrders) => {
+      return prevOrders.map((order) => {
+        if (order.id === selectedOrderForModification.id) {
+          return {
+            ...order,
+            name: mealDetails.name,
+            order: mealDetails.order,
+            table: mealDetails.table,
+            time: mealDetails.time,
+            amount: mealDetails.amount,
+            waiter: mealDetails.waiter,
+          };
+        }
+        return order;
+      });
+    });
+  
+    // Reset selected order and meal details
+    setSelectedOrderForModification(null);
+    setMealDetails(initialMealDetails);
+    setModifyModalVisible(false);
+  };
+  
+  const [mealDetails, setMealDetails] = useState({
+    name: '',
+    order: '',
+    table: '',
+    time: '',
+    amount: '',
+    waiter: '',
+  });  
+  
+  
+  const handleUserSelectionModalClose = () => {
+    // Обработчик закрытия модального окна выбора пользователя
+
+    setModalVisible(false);  // Закрываем модальное окно
+  };
+
   const [notifications, setNotifications] = useState([
     {
       Notification_no: 1,
@@ -28,9 +116,55 @@ const KuchniaPage = () => {
     },
   ]);
   const [isNotificationModalVisible, setNotificationModalVisible] = useState(false);
+  
+  const handleChangeUser = () => {
+    setUserSelectionModalVisible(true); // Изменено с setPermissionsModalVisible(true) на setUserSelectionModalVisible(true)
+  };
+  
+  const handleUserSelection = (userId) => {
+  setSelectedUserId(userId);
+  setUserSelectionModalVisible(false);  // Закрываем модальное окно выбора пользователя
 
+  // Вместо setPermissionsModalVisible(true) вызываем навигацию на LoginPage
+  navigation.navigate('LoginPage');
+};
+
+const [editingOrderId, setEditingOrderId] = useState(null);
+
+
+  
   const [isPermissionsModalVisible, setPermissionsModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null); // Set the user ID for fetching permissions
+  const [currentUser, setCurrentUser] = useState('Anna Nowak');
+
+  
+
+  const [users, setUsers] = useState([
+    { id: 1, name: 'Imie Nazwisko', status: 'Meneger' },
+    { id: 2, name: 'Imie Nazwisko2', status: 'Kelner' },
+    // Добавьте других пользователей по аналогии
+  ]);
+
+//  const handleChangeUser = () => {
+//    setModalVisible(true);
+//  };
+
+const handleAddOrderPress = () => {
+  setAddOrderModalVisible(true);
+};
+
+const handleModalClose = () => {
+  setAddOrderModalVisible(false);
+};
+
+
+
+
+const [orders, setOrders] = useState([]);
+
+
+  
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleShowPermissions = (userId) => {
     setSelectedUserId(userId);
@@ -79,79 +213,70 @@ const KuchniaPage = () => {
   const handleLogoutConfirmed = () => {
     console.log('User logged out');
     toggleLogoutModal();
+    navigation.navigate('LoginPage');
   };
-
-  const [mealDetails, setMealDetails] = useState({
-    name: 'Krewetki',
-    description: 'Opis potrawy, uwagi na jej temat itp.',
-    table: '12',
-    time: '9:30am - 10:00am',
-    amount: '120$',
-    waiter: 'Matra Grabarska',
-  });
+  const initialMealDetails = {
+    name: '',
+    order: '',
+    table: '',
+    time: '',
+    amount: '',
+    waiter: '',
+  };
+  
+ 
 
   const toggleModifyModal = () => {
     setModifyModalVisible(!isModifyModalVisible);
   };
 
-  const handleCancelBookingPress = () => {
-    setBookingCancelled(true);
+  const handleCancelBookingPress = (orderId) => {
+    // Фильтруем заказы, исключая отмененный заказ
+    const updatedOrders = orders.filter(order => order.id !== orderId);
+  
+    // Устанавливаем новый массив заказов без отмененного заказа
+    setOrders(updatedOrders);
   };
+  
 
-  const handleModifyPress = () => {
-    setModifyModalVisible(true);
-  };
 
-  const handleSaveChanges = () => {
-    setMealDetails((prevMealDetails) => ({
-      ...prevMealDetails,
-      name: 'Nowe danie',
-      description: 'Nowy opis dania',
-      table: 'Nowy stolik',
-      time: 'Nowy czas',
-      amount: 'Nowa kwota',
-      waiter: 'Nowy kelner',
-    }));
-    setModifyModalVisible(false);
-  };
 
   const [orderDetails, setOrderDetails] = useState({
     name: '',
-    table: '',
-    amount: '',
-    time: '',
     order: '',
+    table: '',
+    time: '',
+    amount: '',
+    waiter: '',
   });
 
-  const [archiveOrders, setArchiveOrders] = useState([
-    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
-    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
-    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
-    { waiter: 'John Doe', name: 'Pierogi', table: '5', time: '12:30pm', amount: '$50' },
-  ]);
 
-  const handleChangeUser = () => {
-    console.log('Changing user...');
-    handleShowPermissions(userId);
-  };
+
 
   const handleLinkPress = (screenName) => {
     navigation.navigate(screenName);
     setSelectedLink(screenName);
   };
 
-  const handleAddOrderPress = () => {
-    setModalVisible(true);
-  };
 
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
 
   const handleAddOrder = () => {
-    console.log('Adding new order:', orderDetails);
-    setModalVisible(false);
+    const newOrder = {
+      id: orders.length + 1, // Генерируйте уникальный идентификатор (замените это своей логикой)
+      name: orderDetails.name,
+      order: orderDetails.order,
+      table: orderDetails.table,
+      amount: orderDetails.amount,
+      time: orderDetails.time,
+
+      
+      // Добавьте любые другие данные, которые вам необходимо сохранить
+    };
+  
+    setOrders((prevOrders) => [...prevOrders, newOrder]);
+    setAddOrderModalVisible(false);
   };
+  
 
   const handleInputChange = (field, value) => {
     setOrderDetails((prevDetails) => ({ ...prevDetails, [field]: value }));
@@ -160,6 +285,9 @@ const KuchniaPage = () => {
   const toggleProfileModal = () => {
     setProfileModalVisible(!isProfileModalVisible);
   };
+
+ 
+  
 
   return (
     <View style={styles.container}>
@@ -183,8 +311,18 @@ const KuchniaPage = () => {
             <TouchableOpacity onPress={() => handleLinkPress('Kategorie')}>
               <Text style={[styles.headerLink, selectedLink === 'Kategorie' && styles.selectedLink]}>Kategorie</Text>
             </TouchableOpacity>
-            <Image source={require('./assets/call.png')} style={styles.icon} onPress={() => setNotificationModalVisible(true)} />
+            <TouchableOpacity onPress={handleOpenMessagesNotification}>
+              <Image source={require('./assets/call.png')} style={styles.icon} />
+              <MessagesNotification
+                isVisible={isMessagesNotificationVisible}
+                onClose={() => setMessagesNotificationVisible(false)}
+                users={users} // передайте список пользователей
+                onUserSelect={handleSelectUserFromNotification}
+            />
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={toggleProfileModal}>
+            
               <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
             </TouchableOpacity>
           </View>
@@ -218,9 +356,6 @@ const KuchniaPage = () => {
           >
             <View style={styles.profileModalContainer}>
               <View style={styles.profileModalContent}>
-                <TouchableOpacity onPress={() => handleLinkPress('Profile')}>
-                  <Text style={styles.profileModalLink}>Profile</Text>
-                </TouchableOpacity>
                 <TouchableOpacity onPress={handleLogout}>
                   <Text style={styles.profileModalLink}>Log out</Text>
                 </TouchableOpacity>
@@ -233,80 +368,120 @@ const KuchniaPage = () => {
         </View>
 
         <View style={styles.userInfoContainer}>
-          <Text style={styles.userInfoText}>Użytkownik: Anna Nowak</Text>
-          <TouchableOpacity onPress={handleChangeUser} style={styles.changeUserButton}>
-            <Text style={styles.changeUserButtonText}>Zmień użytkownika</Text>
-          </TouchableOpacity>
-          <PermissionsModal
-            isVisible={isPermissionsModalVisible}
-            onClose={handlePermissionsModalClose}
-            userId={selectedUserId}
-          />
-        </View>
-      </View>
+        <Text style={styles.userInfoText}>Użytkownik: {currentUser}</Text>
+        <TouchableOpacity onPress={handleChangeUser} style={styles.changeUserButton}>
+          <Text style={styles.changeUserButtonText}>Zmień użytkownika</Text>
+        </TouchableOpacity>
 
-      <View style={styles.addBasicInfoContainer}>
-        <View style={styles.additionalInfoContainer}>
-          <Text style={styles.additionalInfoText}>Zamówienia</Text>
-          {!isBookingCancelled && (
-            <View style={styles.InfoBox}>
-              <View style={styles.additionalInfoBox}>
-                <View style={styles.additionalInfoBoxSecond}>
-                  <View style={styles.itionalInfoBoxSecondInfo}>
+        <PermissionsModal
+          isVisible={isPermissionsModalVisible}
+          onClose={() => setPermissionsModalVisible(false)}
+          userId={selectedUserId}
+        />
+      </View>
+      </View>
+      <View style={styles.contentContainer}>
+      <Text style={styles.additionalInfoText}>Zamówienia</Text>
+      <View style={styles.addContainer}>
+
+      
+
+
+
+      {orders.map((order) => (
+    <View key={order.id} style={styles.addBasicInfoContainer}>
+      <View style={styles.additionalInfoContainer}>
+        {!isBookingCancelled && (
+          <View style={styles.InfoBox}>
+            <View style={styles.additionalInfoBox}>
+              <View style={styles.additionalInfoBoxSecond}>
+                <View style={styles.itionalInfoBoxSecondInfo}>
+                  <Image
+                    source={require('./assets/user_profile.png')}
+                    style={styles.additionalInfoBoxSecondbackgroundImage}
+                  />
+                  <View style={styles.itionalInfoBoxSecondInfoText}>
+                    <Text style={styles.infoBoxSecondInfoText}>{order.name}</Text>
+                    <Text style={styles.infoBoxSecondInfoTextSecond}>{order.order}</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setTooltipVisible(true)}
+                    onPressOut={() => setTooltipVisible(false)}
+                  >
                     <Image
-                      source={require('./assets/user_profile.png')}
-                      style={styles.additionalInfoBoxSecondbackgroundImage}
+                      source={require('./assets/expectation.png')}
+                      style={styles.additionalInfoBoxSecondImage}
                     />
-                    <View style={styles.itionalInfoBoxSecondInfoText}>
-                      <Text style={styles.infoBoxSecondInfoText}>{mealDetails.name}</Text>
-                      <Text style={styles.infoBoxSecondInfoTextSecond}>{mealDetails.description}</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => setTooltipVisible(true)}
-                      onPressOut={() => setTooltipVisible(false)}
-                    >
-                      <Image
-                        source={require('./assets/expectation.png')}
-                        style={styles.additionalInfoBoxSecondImage}
-                      />
-                    </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.additionalInfoBoxSecondRowTwo}>
+                  <View>
+                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Stolik</Text>
+                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{order.table}</Text>
                   </View>
-                  <View style={styles.additionalInfoBoxSecondRowTwo}>
-                    <View>
-                      <Text style={styles.infoBoxSecondInfoTextRowTwo}>Stolik</Text>
-                      <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.table}</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.infoBoxSecondInfoTextRowTwo}>Time</Text>
-                      <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.time}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.additionalInfoBoxSecondRowTwo}>
-                    <View>
-                      <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kwota</Text>
-                      <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.amount}</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kelner</Text>
-                      <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{mealDetails.waiter}</Text>
-                    </View>
+                  <View>
+                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Time</Text>
+                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{order.time}</Text>
                   </View>
                 </View>
-                <View style={styles.additionalInfoBoxEdit}>
-                  <>
-                    <TouchableOpacity onPress={() => handleCancelBookingPress()}>
-                      <Text style={styles.additionalInfoBoxEditSecond}>Cancel Booking</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleModifyPress()}>
-                      <Text style={styles.additionalInfoBoxEditSecond}>Modify</Text>
-                    </TouchableOpacity>
-                  </>
+                <View style={styles.additionalInfoBoxSecondRowTwo}>
+                  <View>
+                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kwota</Text>
+                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{order.amount}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Kelner</Text>
+                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>{currentUser}</Text>
+                  </View>
                 </View>
               </View>
+              <View style={styles.additionalInfoBoxEdit}>
+                <>
+                  <TouchableOpacity onPress={() => handleCancelBookingPress(order.id)}>
+                    <Text style={styles.additionalInfoBoxEditSecond}>Cancel Booking</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleModifyPress(order.id)}>
+                    <Text style={styles.additionalInfoBoxEditSecond}>Modify</Text>
+                  </TouchableOpacity>
+                </>
+              </View>
             </View>
-          )}
-        </View>
+          </View>
+        )}
       </View>
+    </View>
+  ))}
+
+</View>
+</View>
+
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={isUserSelectionModalVisible}
+  onRequestClose={() => setUserSelectionModalVisible(false)}
+>
+  <UserSelectionModal
+    isVisible={isUserSelectionModalVisible}
+    onClose={() => setUserSelectionModalVisible(false)}  // Передать функцию для закрытия модального окна
+    users={users}
+    onSelectUser={handleUserSelection}
+    setPermissionsModalVisible={setPermissionsModalVisible}
+  />
+</Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isPermissionsModalVisible}
+        onRequestClose={handlePermissionsModalClose}
+      >
+        <PermissionsModal
+          isVisible={isPermissionsModalVisible}
+          onClose={handlePermissionsModalClose}
+          userId={selectedUserId}
+        />
+      </Modal>
 
       <Modal
         animationType="slide"
@@ -326,8 +501,8 @@ const KuchniaPage = () => {
 <TextInput
   style={styles.modifyModalInput}
   placeholder="Nowy opis dania"
-  value={mealDetails.description}
-  onChangeText={(text) => setMealDetails({ ...mealDetails, description: text })}
+  value={mealDetails.order}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, order: text })}
 />
 <TextInput
   style={styles.modifyModalInput}
@@ -346,12 +521,6 @@ const KuchniaPage = () => {
   placeholder="Nowa kwota"
   value={mealDetails.amount}
   onChangeText={(text) => setMealDetails({ ...mealDetails, amount: text })}
-/>
-<TextInput
-  style={styles.modifyModalInput}
-  placeholder="Nowy kelner"
-  value={mealDetails.waiter}
-  onChangeText={(text) => setMealDetails({ ...mealDetails, waiter: text })}
 />
 
 <TouchableOpacity onPress={handleSaveChanges}>
@@ -402,10 +571,10 @@ const KuchniaPage = () => {
       </Modal>
 
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setModalVisible(false)}
+  animationType="slide"
+  transparent={true}
+  visible={isAddOrderModalVisible}
+  onRequestClose={handleModalClose}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -419,6 +588,18 @@ const KuchniaPage = () => {
             />
             <TextInput
               style={styles.modalInput}
+              placeholder="Opis"
+              value={orderDetails.order}
+              onChangeText={(text) => handleInputChange('order', text)}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Czas"
+              value={orderDetails.time}
+              onChangeText={(text) => handleInputChange('time', text)}
+            />
+            <TextInput
+              style={styles.modalInput}
               placeholder="Stolik"
               value={orderDetails.table}
               onChangeText={(text) => handleInputChange('table', text)}
@@ -429,26 +610,13 @@ const KuchniaPage = () => {
               value={orderDetails.amount}
               onChangeText={(text) => handleInputChange('amount', text)}
             />
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Czas"
-              value={orderDetails.time}
-              onChangeText={(text) => handleInputChange('time', text)}
-            />
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Zamówienie"
-              value={orderDetails.order}
-              onChangeText={(text) => handleInputChange('order', text)}
-            />
 
-            <TouchableOpacity onPress={handleAddOrder}>
-              <Text style={styles.modalAddOrderButton}>Dodaj Zamówienie</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={handleModalClose}>
-              <Text style={styles.modalCloseButton}>Close</Text>
-            </TouchableOpacity>
+      <TouchableOpacity onPress={handleAddOrder}>
+        <Text style={styles.modalAddOrderButton}>Dodaj Zamówienie</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleModalClose}>
+        <Text style={styles.modalCloseButton}>Close</Text>
+      </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -465,6 +633,9 @@ const KuchniaPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width:'100%',
+    height:'100%',
+    alignItems: 'center',
   },
   backgroundImage: {
     width: '100%',
@@ -478,8 +649,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginLeft:250,
-    marginRight:250,
+    width: '100%',
+  },
+  contentContainer: {
+    width: '70%',
   },
   logo: {
     width: 40,
@@ -514,7 +687,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   userInfoContainer: {
-    marginLeft:250,
     marginTop: 40,
     justifyContent: 'flex-start',
   },
@@ -562,9 +734,15 @@ const styles = StyleSheet.create({
   addBasicInfoContainer: {
 
     flexDirection: 'row',
-    marginLeft:250,
-    marginRight:250,
-    marginTop: 70,
+    justifyContent: 'flex-start',
+    marginRight:400,
+    marginTop: 10,
+
+  },
+  skrollBasicInfoContainer: {
+
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
 
   },
 
@@ -578,6 +756,8 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 18,
     fontWeight: 'light',
+    paddingTop:80,
+
   },
   additionalInfoBox: {
     width: 393,
@@ -836,6 +1016,12 @@ const styles = StyleSheet.create({
     color: 'blue',
     fontSize: 16,
   },
+  addContainer:{
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    flexDirection: 'row',
+  }
 });
 
 export default KuchniaPage;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,18 +7,320 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
+  FlatList,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import PermissionsModal from './PermissionsModal';
+import UserSelectionModal from './UserSelectionModal';
+import MessagesNotification from './MessagesNotification';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addCategory, getCategories } from './ApiComponent';
+
 
 
 const Kategorie = () => {
-  
   const navigation = useNavigation();
-  const [selectedLink, setSelectedLink] = useState(null);
-  const [isTooltipVisible, setTooltipVisible] = useState(false);
+
+
   const [isModalVisible, setModalVisible] = useState(false);
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
+  const [isBookingCancelled, setBookingCancelled] = useState(false);
+  const [isModifyModalVisible, setModifyModalVisible] = useState(false);
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+  
+  const [isUserSelectionModalVisible, setUserSelectionModalVisible] = useState(false);
+  const [isAddOrderModalVisible, setAddOrderModalVisible] = useState(false);
+
+  const [isMessagesNotificationVisible, setMessagesNotificationVisible] = useState(false);
+
+  const [selectedOrderForModification, setSelectedOrderForModification] = useState(null);
+
+  /////////////
+
+// category
+  const [orderDetails, setOrderDetails] = useState({
+    name: '',
+    higher_category: null, // Добавляем поле для указания вышестоящей категории
+  });
+
+  // const handleAddCategory = async () => {
+  //   try {
+  //     // Отправляем данные о новой категории на бэкенд
+  //     const response = await addCategory(orderDetails);
+  //     // После успешного добавления категории можно выполнить какие-то дополнительные действия,
+  //     // например, обновить список категорий или закрыть модальное окно
+  //     console.log('Category added successfully:', response);
+  //   } catch (error) {
+  //     console.error('Error adding category:', error);
+  //   }
+  // };
+
+  // const handleInputChange = (field, value) => {
+  //   setOrderDetails((prevDetails) => ({ ...prevDetails, [field]: value }));
+  // };
+
+
+//////////////
+
+
+//getCategori
+// const baseUrl = 'http://localhost:8000/kfp';
+
+// const getCategories = async (pk, hk) => {
+//   const CategoriesEndpoint = `${baseUrl}/Categories`;
+
+//   try {
+//     // Pobierz refreshToken z AsyncStorage
+//     const refreshToken = await AsyncStorage.getItem('refreshToken');
+
+//     // Sprawdź, czy refreshToken istnieje
+//     if (!refreshToken) {
+//       console.error('Brak refreshToken w AsyncStorage');
+//       // Obsłuż brak refreshToken, np. przekierowuj do ekranu logowania
+//       return;
+//     }
+
+//     // Dodaj refreshToken do nagłówka żądania
+//     const headers = {
+//       Cookie: `refreshToken=${refreshToken};`,
+//     };
+
+//     let url = CategoriesEndpoint;
+
+//     // Sprawdź, który warunek odpowiada temu, co chcemy uzyskać
+//     if (pk === 0 && hk === 0) {
+//       // Odpowiedź A: Pełna lista kategorii
+//       url = `${CategoriesEndpoint}/0/0/`;
+//     } else if (pk !== 0 && hk === 0) {
+//       // Odpowiedź B: Dane wybranej kategorii
+//       url = `${CategoriesEndpoint}/${pk}/0/`;
+//     } else if (hk !== 0) {
+//       // Odpowiedź C: Dane kategorii, które dziedziczą po wybranej kategorii
+//       url = `${CategoriesEndpoint}/0/${hk}/`;
+//     }
+
+//     // Wysyłaj żądanie do odpowiedniego endpointu z refreshToken w nagłówku
+//     const response = await axios.get(url, { headers });
+
+//     const responseData = response.data;
+//     console.log('Dane kategorii z Django:', responseData);
+
+//     // Zwróć odpowiedź
+//     return responseData;
+//   } catch (error) {
+//     console.error('Błąd podczas pobierania kategorii:', error);
+//     throw error;
+//   }
+// };
+
+
+const [selectedLink, setSelectedLink] = useState(null);
+
+const [categories, setCategories] = useState([]);
+
+
+const fetchCategories = async (pk, hk) => {
+  try {
+    const data = await getCategories(pk, hk);
+    setCategories(data);
+    
+  } catch (error) {
+    console.error('Błąd podczas pobierania kategorii:', error);
+  }
+};
+
+useEffect(() => {
+  // При монтировании компонента вызываем функцию для загрузки категорий
+  fetchCategories(0, 0);
+}, []);
+
+
+const handleAddCategory = async () => {
+  try {
+    // Dodaj kategorię na backendzie
+    const response = await addCategory(orderDetails);
+    console.log('Kategoria dodana pomyślnie:', response);
+    await refreshAccessToken();
+  } catch (error) {
+    console.error('Błąd dodawania kategorii:', error);
+  }
+};
+
+const handleInputChange = (field, value) => {
+  setOrderDetails((prevDetails) => ({ ...prevDetails, [field]: value }));
+};
+
+
+/////
+
+
+
+  // Добавьте функцию открытия уведомлений
+  const handleOpenMessagesNotification = () => {
+    setMessagesNotificationVisible(true);
+  };
+
+  // Добавьте функцию выбора пользователя из уведомлений
+  const handleSelectUserFromNotification = (userId) => {
+    // Ваш код для обработки выбранного пользователя
+    // Например, перейти на экран чата с этим пользователем
+    console.log('Selected user ID:', userId);
+  };
+  
+  
+  
+  const handleModifyPress = (orderId) => {
+    const selectedOrder = orders.find((order) => order.id === orderId);
+    if (selectedOrder) {
+      setSelectedOrderForModification(selectedOrder);
+      setMealDetails({
+        name: selectedOrder.name,
+        order: selectedOrder.order,
+        table: selectedOrder.table,
+        time: selectedOrder.time,
+        amount: selectedOrder.amount,
+        email: selectedOrder.email,
+      });
+      setModifyModalVisible(true);
+    }
+  };
+  
+  
+  const handleSaveChanges = () => {
+    // Update the selected order with new details
+    setOrders((prevOrders) => {
+      return prevOrders.map((order) => {
+        if (order.id === selectedOrderForModification.id) {
+          return {
+            ...order,
+            name: mealDetails.name,
+            order: mealDetails.order,
+            table: mealDetails.table,
+            time: mealDetails.time,
+            amount: mealDetails.amount,
+            email: mealDetails.email,
+          };
+        }
+        return order;
+      });
+    });
+  
+    // Reset selected order and meal details
+    setSelectedOrderForModification(null);
+    setMealDetails(initialMealDetails);
+    setModifyModalVisible(false);
+  };
+  
+  const [mealDetails, setMealDetails] = useState({
+    name: '',
+    order: '',
+    table: '',
+    time: '',
+    amount: '',
+    email: '',
+  });  
+  
+  
+  const handleUserSelectionModalClose = () => {
+    // Обработчик закрытия модального окна выбора пользователя
+
+    setModalVisible(false);  // Закрываем модальное окно
+  };
+
+  const [notifications, setNotifications] = useState([
+    {
+      Notification_no: 1,
+      notification: 'Przykład',
+      status: 0,
+    },
+  ]);
+  const [isNotificationModalVisible, setNotificationModalVisible] = useState(false);
+  
+  const handleChangeUser = () => {
+    setUserSelectionModalVisible(true); // Изменено с setPermissionsModalVisible(true) на setUserSelectionModalVisible(true)
+  };
+  
+  const handleUserSelection = (userId) => {
+  setSelectedUserId(userId);
+  setUserSelectionModalVisible(false);  // Закрываем модальное окно выбора пользователя
+
+  // Вместо setPermissionsModalVisible(true) вызываем навигацию на LoginPage
+  navigation.navigate('LoginPage');
+};
+
+const [editingOrderId, setEditingOrderId] = useState(null);
+
+
+  
+  const [isPermissionsModalVisible, setPermissionsModalVisible] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null); // Set the user ID for fetching permissions
+  const [currentUser, setCurrentUser] = useState('Anna Nowak');
+
+  
+
+  const [users, setUsers] = useState([
+    { id: 1, name: 'Imie Nazwisko', status: 'Meneger' },
+    { id: 2, name: 'Imie Nazwisko2', status: 'Kelner' },
+    // Добавьте других пользователей по аналогии
+  ]);
+
+//  const handleChangeUser = () => {
+//    setModalVisible(true);
+//  };
+
+const handleAddOrderPress = () => {
+  setAddOrderModalVisible(true);
+};
+
+const handleModalClose = () => {
+  setAddOrderModalVisible(false);
+};
+
+
+
+
+const [orders, setOrders] = useState([]);
+
+
+  
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const handleShowPermissions = (userId) => {
+    setSelectedUserId(userId);
+    setPermissionsModalVisible(true);
+  };
+
+  const handlePermissionsModalClose = () => {
+    setPermissionsModalVisible(false);
+    setSelectedUserId(null);
+  };
+
+
+
+  const loadNotifications = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/kfp/Notifications', {
+        method: 'GET',
+      });
+
+      const data = await response.json();
+
+      if (data.message === 'Brak powiadomień') {
+        setNotifications([]);
+      } else {
+        setNotifications(data);
+      }
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isNotificationModalVisible) {
+      loadNotifications();
+    }
+  }, [isNotificationModalVisible]);
 
   const toggleLogoutModal = () => {
     setLogoutModalVisible(!isLogoutModalVisible);
@@ -31,56 +333,78 @@ const Kategorie = () => {
   const handleLogoutConfirmed = () => {
     console.log('User logged out');
     toggleLogoutModal();
+    navigation.navigate('LoginPage');
   };
-
-
+  const initialMealDetails = {
+    name: '',
+    order: '',
+    table: '',
+    time: '',
+    amount: '',
+    email: '',
+  };
   
  
-  const toggleProfileModal = () => {
-    setProfileModalVisible(!isProfileModalVisible);
+
+  const toggleModifyModal = () => {
+    setModifyModalVisible(!isModifyModalVisible);
   };
 
-  const [orderDetails, setOrderDetails] = useState({
-    table: '',
-    amount: '',
-    time: '',
-    order: '',
-  });
-
-  const handleCancelBookingPress = () => {
-    console.log('Cancel Booking pressed...');
-  };
-
-  const handleModifyPress = () => {
-    console.log('Modify pressed...');
+  const handleCancelBookingPress = (orderId) => {
+    // Фильтруем заказы, исключая отмененный заказ
+    const updatedOrders = orders.filter(order => order.id !== orderId);
+  
+    // Устанавливаем новый массив заказов без отмененного заказа
+    setOrders(updatedOrders);
   };
   
 
-  const handleChangeUser = () => {
-    console.log('Changing user...');
-  };
+
+
+  // const [orderDetails, setOrderDetails] = useState({
+  //   name: '',
+  //   order: '',
+  //   table: '',
+  //   time: '',
+  //   amount: '',
+  //   email: '',
+  // });
+
+
+
 
   const handleLinkPress = (screenName) => {
     navigation.navigate(screenName);
     setSelectedLink(screenName);
   };
 
-  const handleAddOrderPress = () => {
-    setModalVisible(true);
-  };
-
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
-
+ 
   const handleAddOrder = () => {
-    console.log('Adding new order:', orderDetails);
-    setModalVisible(false);
+    const newOrder = {
+      id: orders.length + 1,
+      name: orderDetails.name,
+      order: orderDetails.order,
+      table: orderDetails.table,
+      amount: orderDetails.amount,
+      time: orderDetails.time,
+      email: orderDetails.email,
+    };
+  
+    setOrders((prevOrders) => [...prevOrders, newOrder]);
+    setAddOrderModalVisible(false);
+  
+  
+  };
+  
+
+
+
+  const toggleProfileModal = () => {
+    setProfileModalVisible(!isProfileModalVisible);
   };
 
-  const handleInputChange = (field, value) => {
-    setOrderDetails((prevDetails) => ({ ...prevDetails, [field]: value }));
-  };
+ 
+  
 
   return (
     <View style={styles.container}>
@@ -88,31 +412,60 @@ const Kategorie = () => {
       <View style={styles.contentContainer}>
         <View style={styles.header}>
           <Image source={require('./assets/logo.png')} style={styles.logo} />
-
           <View style={styles.headerTextContainer}>
-        <TouchableOpacity onPress={() => handleLinkPress('KuchniaPage')}>
-          <Text style={[styles.headerLink, selectedLink === 'KuchniaPage' && styles.selectedLink]}>Zamówienia</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleLinkPress('Kuchnia')}>
-          <Text style={[styles.headerLink, selectedLink === 'Kuchnia' && styles.selectedLink]}>Kuchnia</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleLinkPress('ZarzadzaniePage')}>
-          <Text style={[styles.headerLink, selectedLink === 'ZarzadzaniePage' && styles.selectedLink]}>Zarządzanie</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleLinkPress('Restauracja')}>
-          <Text style={[styles.headerLink, selectedLink === 'Restauracja' && styles.selectedLink]}>Restauracja</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleLinkPress('Kategorie')}>
-          <Text style={[styles.headerLink, selectedLink === 'Kategorie' && styles.selectedLink]}>Kategorie</Text>
-        </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLinkPress('KuchniaPage')}>
+              <Text style={[styles.headerLink, selectedLink === 'KuchniaPage' && styles.selectedLink]}>Zamówienia</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLinkPress('Kuchnia')}>
+              <Text style={[styles.headerLink, selectedLink === 'Kuchnia' && styles.selectedLink]}>Kuchnia</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLinkPress('ZarzadzaniePage')}>
+              <Text style={[styles.headerLink, selectedLink === 'ZarzadzaniePage' && styles.selectedLink]}>Zarządzanie</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLinkPress('Restauracja')}>
+              <Text style={[styles.headerLink, selectedLink === 'Restauracja' && styles.selectedLink]}>Restauracja</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLinkPress('Kategorie')}>
+              <Text style={[styles.headerLink, selectedLink === 'Kategorie' && styles.selectedLink]}>Kategorie</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleOpenMessagesNotification}>
+              <Image source={require('./assets/call.png')} style={styles.icon} />
+              <MessagesNotification
+                isVisible={isMessagesNotificationVisible}
+                onClose={() => setMessagesNotificationVisible(false)}
+                users={users} // передайте список пользователей
+                onUserSelect={handleSelectUserFromNotification}
+            />
+            </TouchableOpacity>
 
-        <Image source={require('./assets/call.png')} style={styles.icon} />
-          <TouchableOpacity onPress={toggleProfileModal}>
-        <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
-          </TouchableOpacity>
-      </View>
+            <TouchableOpacity onPress={toggleProfileModal}>
+            
+              <Image source={require('./assets/user_profile.png')} style={styles.profileImage} />
+            </TouchableOpacity>
+          </View>
 
-      <Modal
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isNotificationModalVisible}
+            onRequestClose={() => setNotificationModalVisible(false)}
+          >
+            <View style={styles.notificationModalContainer}>
+              <View style={styles.notificationModalContent}>
+                <Text style={styles.notificationModalText}>Powiadomienia</Text>
+                {notifications.map((notification) => (
+                  <View key={notification.Notification_no} style={styles.notificationItem}>
+                    <Text style={styles.notificationText}>{notification.notification}</Text>
+                  </View>
+                ))}
+                <TouchableOpacity onPress={() => setNotificationModalVisible(false)}>
+                  <Text style={styles.notificationModalCloseButton}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
             animationType="slide"
             transparent={true}
             visible={isProfileModalVisible}
@@ -120,9 +473,6 @@ const Kategorie = () => {
           >
             <View style={styles.profileModalContainer}>
               <View style={styles.profileModalContent}>
-                <TouchableOpacity onPress={() => handleLinkPress('Profile')}>
-                  <Text style={styles.profileModalLink}>Profile</Text>
-                </TouchableOpacity>
                 <TouchableOpacity onPress={handleLogout}>
                   <Text style={styles.profileModalLink}>Log out</Text>
                 </TouchableOpacity>
@@ -132,22 +482,33 @@ const Kategorie = () => {
               </View>
             </View>
           </Modal>
-
         </View>
-
-        
 
         <View style={styles.userInfoContainer}>
-          <Text style={styles.userInfoText}>Użytkownik: Anna Nowak</Text>
-          <TouchableOpacity onPress={handleChangeUser} style={styles.changeUserButton}>
-            <Text style={styles.changeUserButtonText}>Zmień użytkownika</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        <Text style={styles.userInfoText}>Użytkownik: {currentUser}</Text>
+        <TouchableOpacity onPress={handleChangeUser} style={styles.changeUserButton}>
+          <Text style={styles.changeUserButtonText}>Zmień użytkownika</Text>
+        </TouchableOpacity>
 
-      <View style={styles.addBasicInfoContainer}>
-        <View style={styles.additionalInfoContainer}>
-          <Text style={styles.additionalInfoText}>Kategorie</Text>
+        <PermissionsModal
+          isVisible={isPermissionsModalVisible}
+          onClose={() => setPermissionsModalVisible(false)}
+          userId={selectedUserId}
+        />
+      </View>
+      </View>
+      <View style={styles.contentContainer}>
+      <Text style={styles.additionalInfoText}>Kategorie</Text>
+      <View style={styles.addContainer}>
+
+      
+
+
+
+      {categories.map((category) => (
+    <View key={category.id} style={styles.addBasicInfoContainer}>
+      <View style={styles.additionalInfoContainer}>
+        {!isBookingCancelled && (
           <View style={styles.InfoBox}>
             <View style={styles.additionalInfoBox}>
               <View style={styles.additionalInfoBoxSecond}>
@@ -157,40 +518,100 @@ const Kategorie = () => {
                     style={styles.additionalInfoBoxSecondbackgroundImage}
                   />
                   <View style={styles.itionalInfoBoxSecondInfoText}>
-                    <Text style={styles.infoBoxSecondInfoText}>Krewetki</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecond}>
-                    Przystawki
-                    </Text>
+                    <Text style={styles.infoBoxSecondInfoText}>{category.name}</Text>
+                    <Text style={styles.infoBoxSecondInfoTextSecond}>{category.higher_category}</Text>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => setTooltipVisible(true)}
-                    onPressOut={() => setTooltipVisible(false)}
-                    >
-                    
-                  </TouchableOpacity>
                 </View>
                 <View style={styles.additionalInfoBoxSecondRowTwo}>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Cena</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>16zł</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.infoBoxSecondInfoTextRowTwo}>Info</Text>
-                    <Text style={styles.infoBoxSecondInfoTextSecondRowTwo}>krótki opis, dane</Text>
-                  </View>
+
+
                 </View>
               </View>
-
               <View style={styles.additionalInfoBoxEdit}>
-
-                <TouchableOpacity onPress={() => handleModifyPress()}>
-                  <Text style={styles.additionalInfoBoxEditSecond}>Edytuj Kategorię</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity onPress={() => handleCancelBookingPress(order.id)}>
+                    <Text style={styles.additionalInfoBoxEditSecond}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleModifyPress(order.id)}>
+                    <Text style={styles.additionalInfoBoxEditSecond}>Modify</Text>
+                  </TouchableOpacity>
+                </>
               </View>
             </View>
           </View>
-        </View>
+        )}
       </View>
+    </View>
+  ))}
+
+</View>
+</View>
+
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={isUserSelectionModalVisible}
+  onRequestClose={() => setUserSelectionModalVisible(false)}
+>
+  <UserSelectionModal
+    isVisible={isUserSelectionModalVisible}
+    onClose={() => setUserSelectionModalVisible(false)}  // Передать функцию для закрытия модального окна
+    users={users}
+    onSelectUser={handleUserSelection}
+    setPermissionsModalVisible={setPermissionsModalVisible}
+  />
+</Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isPermissionsModalVisible}
+        onRequestClose={handlePermissionsModalClose}
+      >
+        <PermissionsModal
+          isVisible={isPermissionsModalVisible}
+          onClose={handlePermissionsModalClose}
+          userId={selectedUserId}
+        />
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModifyModalVisible}
+        onRequestClose={toggleModifyModal}
+      >
+        <View style={styles.modifyModalContainer}>
+          <View style={styles.modifyModalContent}>
+           
+            <TextInput
+  style={styles.modifyModalInput}
+  placeholder="Name category"
+  value={mealDetails.name}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, name: text })}
+/>
+<TextInput
+  style={styles.modifyModalInput}
+  placeholder="Category"
+  value={mealDetails.order}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, order: text })}
+/>
+<TextInput
+  style={styles.modifyModalInput}
+  placeholder="Higher Category"
+  value={mealDetails.time}
+  onChangeText={(text) => setMealDetails({ ...mealDetails, time: text })}
+/>
+
+<TouchableOpacity onPress={handleSaveChanges}>
+              <Text style={styles.modifyModalSaveButton}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleModifyModal}>
+              <Text style={styles.modifyModalCloseButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         animationType="slide"
@@ -211,37 +632,33 @@ const Kategorie = () => {
         </View>
       </Modal>
 
-      
 
-      <Modal animationType="slide" transparent={true} visible={isModalVisible} onRequestClose={() => setModalVisible(false)}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isAddOrderModalVisible}
+        onRequestClose={handleModalClose}
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>Dodaj Kategorię</Text>
 
             <TextInput
               style={styles.modalInput}
-              placeholder="Kategoria"
-              value={orderDetails.table}
-              onChangeText={(text) => handleInputChange('table', text)}
+              placeholder="Name category"
+              value={orderDetails.name}
+              onChangeText={(text) => handleInputChange('name', text)}
             />
             <TextInput
               style={styles.modalInput}
-              placeholder="Cena"
-              value={orderDetails.amount}
-              onChangeText={(text) => handleInputChange('amount', text)}
+              placeholder="Higher Category ID"
+              value={orderDetails.higher_category}
+              onChangeText={(text) => handleInputChange('higher_category', text)}
             />
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Info"
-              value={orderDetails.time}
-              onChangeText={(text) => handleInputChange('time', text)}
-            />
-           
 
-            <TouchableOpacity onPress={handleAddOrder}>
+            <TouchableOpacity onPress={handleAddCategory}>
               <Text style={styles.modalAddOrderButton}>Dodaj Kategorię</Text>
             </TouchableOpacity>
-
             <TouchableOpacity onPress={handleModalClose}>
               <Text style={styles.modalCloseButton}>Close</Text>
             </TouchableOpacity>
@@ -261,6 +678,9 @@ const Kategorie = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width:'100%',
+    height:'100%',
+    alignItems: 'center',
   },
   backgroundImage: {
     width: '100%',
@@ -274,15 +694,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginLeft:250,
-    marginRight:250,
+    width: '100%',
+  },
+  contentContainer: {
+    width: '70%',
   },
   logo: {
     width: 40,
     height: 40,
     marginRight: 30,
   },
-
+ 
   headerTextContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -310,7 +732,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   userInfoContainer: {
-    marginLeft:250,
     marginTop: 40,
     justifyContent: 'flex-start',
   },
@@ -358,9 +779,15 @@ const styles = StyleSheet.create({
   addBasicInfoContainer: {
 
     flexDirection: 'row',
-    marginLeft:250,
-    marginRight:250,
-    marginTop: 70,
+    justifyContent: 'flex-start',
+    marginRight:400,
+    marginTop: 10,
+
+  },
+  skrollBasicInfoContainer: {
+
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
 
   },
 
@@ -374,6 +801,8 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 18,
     fontWeight: 'light',
+    paddingTop:80,
+
   },
   additionalInfoBox: {
     width: 393,
@@ -399,6 +828,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowColor: '#000',
     padding:14,
+    justifyContent:'flex-start'
 
   },
   itionalInfoBoxSecondInfo:{
@@ -411,6 +841,7 @@ const styles = StyleSheet.create({
   additionalInfoBoxSecondbackgroundImage:{
     width: 65,
     height: 65,
+    marginRight:15,
 
   },
 
@@ -420,21 +851,19 @@ const styles = StyleSheet.create({
   },
   infoBoxSecondInfoText:{
     fontSize:18,
-    marginLeft:20,
     fontWeight: 'light',
     color: '#000618',
 
   },
   infoBoxSecondInfoTextSecond:{
     fontSize:14,
-    marginLeft:20,
     fontWeight: 'light',
     color: '#646567',
 
   },
   additionalInfoBoxSecondRowTwo:{
     marginTop:20,
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
@@ -466,12 +895,6 @@ const styles = StyleSheet.create({
     marginTop: 360,
   },
 
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
   modalContent: {
     backgroundColor: '#fff',
     padding: 20,
@@ -510,7 +933,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     alignItems: 'center',
-    width: '60%', // Увеличил ширину до 60%
+    width: '60%', // Увеличил ширину до 80%
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
@@ -573,9 +996,79 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
   },
-
+  notificationModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  notificationModalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    width: '60%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  notificationModalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  notificationItem: {
+    marginTop: 10,
+  },
+  notificationText: {
+    fontSize: 16,
+  },
+  notificationModalCloseButton: {
+    color: 'blue',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  modifyModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modifyModalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modifyModalInput: {
+    width: '100%',
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    paddingLeft: 10,
+  },
+  modifyModalSaveButton: {
+    backgroundColor: '#FA8E4D',
+    color: '#fff',
+    fontSize: 16,
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  modifyModalCloseButton: {
+    color: 'blue',
+    fontSize: 16,
+  },
+  addContainer:{
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    flexDirection: 'row',
+  }
 });
-  
-
 
 export default Kategorie;

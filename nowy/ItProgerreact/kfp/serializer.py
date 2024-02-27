@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, Group
 from .models import Bills, Categories, Dishes, DishesProducts, DishesVariants, Notifications, Orders, OrdersHasDishes, User
 
 class UserSerializer(ModelSerializer):
@@ -26,11 +26,12 @@ class UserDetailsSerializer(ModelSerializer):
     last_name = serializers.CharField(max_length=255, allow_null=True)
     class Meta:
         model = User
-        fields = ['id','hired_time', 'phone_no', 'first_name', 'last_name', 'username', 'email', 'last_login']
+        fields = ['id','hired_time', 'fired_time', 'phone_no', 'first_name', 'last_name', 'username', 'email', 'last_login']
         extra_kwargs = {
             'password': {'write_only': True},
             'last_login': {'read_only': True},
             'hired_time': {'read_only': True},
+            'fired_time': {'read_only': True},
         }
     def update(self, instance, validated_data):
         new_password = validated_data.get('password')
@@ -131,7 +132,7 @@ class PendingOrderDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrdersHasDishes
-        fields = ['Order', 'id', 'count', 'done', 'Variant_no', 'Variant_count', 'Dish_name']
+        fields = ['Order', 'id', 'count', 'done', 'Variant_no', 'Variant_count', 'Dish_name', 'note']
 
 class OrderStartSerializer(serializers.Serializer):
     table = serializers.CharField(max_length=4)
@@ -142,7 +143,7 @@ class OrderCreateSerializer(serializers.Serializer):
     counts = serializers.ListField(write_only=True, child=serializers.DecimalField(max_digits=8, decimal_places=2))
     variants = serializers.ListField(write_only=True, child=serializers.IntegerField())
 
-class PermissionSerializer(serializers.Serializer):
+class Permission2Serializer(serializers.Serializer):
     group_id = serializers.IntegerField(required=True)
     user_id = serializers.IntegerField(required=True)
     permission_codename = serializers.CharField(required=True)
@@ -159,3 +160,31 @@ class NotificationsSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'Notification_no': {'read_only': True}
         }
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = ['id', 'name', 'codename']
+
+class GroupSerializer(serializers.ModelSerializer):
+    permissions = serializers.SerializerMethodField()
+
+    def get_permissions(self, group):
+        permissions = Permission.objects.filter(group=group)
+        return PermissionSerializer(permissions, many=True).data
+
+    class Meta:
+        model = Group
+        fields = ['id', 'name', 'permissions']
+
+class GroupUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['id','name']
+
+class UserGroupSerializer(serializers.ModelSerializer):
+    groups = GroupUserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'groups']

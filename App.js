@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import React from "react";
+
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import LoginPage from "./LoginPage";
-import KuchniaPage from "./KuchniaPage";
-import Kuchnia from "./Kuchnia";
-import ZarzadzaniePage from "./ZarzadzaniePage";
-import Restauracja from "./Restauracja";
-import Kategorie from "./Kategorie";
+import Login from "./Login";
+import Orders from "./Orders";
+import Kitchen from "./Kitchen";
+import Management from "./Management";
+import Restaurant from "./Restaurant";
+import Categories from "./Categories";
 
 const Stack = createStackNavigator();
 
@@ -19,27 +17,18 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         <>
-          <Stack.Screen name="LoginPage" component={LoginPage} />
+          <Stack.Screen name="Login" component={Login} />
           <Stack.Screen
-            name="KuchniaPage"
-            component={KuchniaPage}
+            name="Orders"
+            component={Orders}
             options={{ headerLeft: () => null }}
           />
-          <Stack.Screen name="Kuchnia" component={Kuchnia} />
-          <Stack.Screen name="ZarzadzaniePage" component={ZarzadzaniePage} />
-          <Stack.Screen name="Restauracja" component={Restauracja} />
-          <Stack.Screen name="Kategorie" component={Kategorie} />
+          <Stack.Screen name="Kitchen" component={Kitchen} />
+          <Stack.Screen name="Management" component={Management} />
+          <Stack.Screen name="Restaurant" component={Restaurant} />
+          <Stack.Screen name="Categories" component={Categories} />
         </>
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

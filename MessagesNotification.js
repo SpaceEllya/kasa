@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,11 +6,9 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  ScrollView,
   FlatList,
   Picker,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   getNotifications,
@@ -19,19 +17,8 @@ import {
   markNotificationAsViewed,
 } from "./ApiComponent";
 
-const MessagesNotification = ({
-  isVisible,
-  onClose,
-  onUserSelect,
-  onSendMessage,
-}) => {
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState("");
-  const scrollViewRef = useRef();
-  const [unreadCount, setUnreadCount] = useState(0);
+const MessagesNotification = ({ isVisible, onClose }) => {
   const [notifications, setNotifications] = useState([]);
-  const [isNotificationModalVisible, setNotificationModalVisible] =
-    useState(false);
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [notificationText, setNotificationText] = useState("");
@@ -39,6 +26,8 @@ const MessagesNotification = ({
   const [selectedUsername, setSelectedUsername] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(0);
   const [activeNotificationId, setActiveNotificationId] = useState(null);
+
+  // Receive notifications and updates
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -57,9 +46,11 @@ const MessagesNotification = ({
     return () => clearInterval(interval);
   }, []);
 
+  // Message read
+
   const handleOpenNotification = async (notificationId) => {
     try {
-      setActiveNotificationId(notificationId); // Устанавливаем активный ID уведомления
+      setActiveNotificationId(notificationId);
       await markNotificationAsViewed(notificationId);
       const updatedNotifications = notifications.map((notification) => {
         if (notification.id === notificationId) {
@@ -67,11 +58,14 @@ const MessagesNotification = ({
         }
         return notification;
       });
+
       setNotifications(updatedNotifications);
     } catch (error) {
       console.error("Error marking notification as viewed:", error);
     }
   };
+
+  // Notifications
 
   const renderNotificationItem = ({ item }) => {
     return (
@@ -113,6 +107,8 @@ const MessagesNotification = ({
     );
   };
 
+  // Send User Mess
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -130,7 +126,7 @@ const MessagesNotification = ({
       <View style={styles.notificationItemContainer}>
         <TouchableOpacity
           onPress={() => {
-            handleUserSelect(item); // Вызов функции handleUserSelect при выборе пользователя
+            handleUserSelect(item);
           }}
         >
           <View style={styles.notificationItemContent}>
@@ -176,52 +172,9 @@ const MessagesNotification = ({
   }, []);
 
   const handleUserSelect = (item) => {
-    setSelectedUserId(item.id); // Установка выбранного пользователя
+    setSelectedUserId(item.id);
     setSelectedUsername(item.username);
     setIsSendingNotification(true);
-  };
-
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [messages]);
-
-  const handleSendMessage = () => {
-    if (inputMessage.trim() === "") {
-      return;
-    }
-
-    const newMessage = {
-      _id: messages.length + 1,
-      text: inputMessage,
-      createdAt: new Date(),
-      user: { _id: 1 }, // Replace with real user id
-    };
-
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-    onSendMessage(newMessage.text);
-    setInputMessage("");
-  };
-
-  const handleDeleteMessage = (messageId) => {
-    setMessages((prevMessages) =>
-      prevMessages.filter((message) => message._id !== messageId)
-    );
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.nativeEvent.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const formatMessageTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${minutes}`;
   };
 
   return (
@@ -234,7 +187,7 @@ const MessagesNotification = ({
       <View style={styles.container}>
         <View style={styles.notificationContent}>
           <View style={styles.centeredContainer}>
-            <Text style={styles.notificationHeaderText}>Powiadomienia</Text>
+            <Text style={styles.notificationHeaderText}>Notifications</Text>
           </View>
           <View style={styles.notificationsContent}>
             <FlatList
@@ -248,7 +201,7 @@ const MessagesNotification = ({
             <>
               <View style={styles.centeredContainer}>
                 <Text style={styles.notificationHeaderText}>
-                  Wysłać powiadomienie do {selectedUsername}
+                  Send notification to {selectedUsername}
                 </Text>
               </View>
 
@@ -283,7 +236,7 @@ const MessagesNotification = ({
             <>
               <View style={styles.centeredContainer}>
                 <Text style={styles.notificationHeaderText}>
-                  Wysłać powiadomienie
+                  Send notification
                 </Text>
               </View>
               <View style={styles.notificationsContentMess}>
@@ -342,48 +295,6 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 
-  messageContainer: {
-    flex: 1,
-    width: "100%",
-  },
-  messageItem: {
-    marginBottom: 10,
-    width: "100%",
-  },
-  messageRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  leftContainer: {
-    flex: 1,
-    alignSelf: "flex-start",
-    marginLeft: 5,
-  },
-  rightContainer: {
-    flex: 0,
-    alignSelf: "flex-end",
-    marginRight: 5,
-    marginLeft: 5,
-  },
-  senderName: {
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  messageText: {
-    fontSize: 16,
-    maxHeight: "90%",
-  },
-  timestampText: {
-    fontSize: 12,
-    color: "#777",
-    width: 100,
-  },
-  divider: {
-    borderBottomColor: "#ccc",
-    borderBottomWidth: 1,
-    marginVertical: 5,
-  },
   inputField: {
     borderColor: "gray",
     borderWidth: 1,
@@ -414,14 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
-  deleteButton: {
-    backgroundColor: "#C40000",
-    padding: 8,
-    borderRadius: 5,
-  },
-  deleteButtonText: {
-    color: "#fff",
-  },
+
   notificationItemContainer: {
     backgroundColor: "rgba(255, 255, 255, 1)",
     borderRadius: 5,

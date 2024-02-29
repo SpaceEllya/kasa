@@ -812,7 +812,7 @@ export const RemoveUserFromGroup = async (uk, gk) => {
 
     const url = `${RemoveUserFromGroupEndpoint}/${uk}/${gk}/`;
 
-    const response = await axios.post(url, { headers });
+    const response = await axios.post(url, {}, { headers });
     const responseData = response.data;
 
     console.log("Grupa usunięta z użytkownika:", responseData);
@@ -845,7 +845,7 @@ export const AddUserToGroup = async (uk, gk) => {
 
     const url = `${AddUserToGroupEndpoint}/${uk}/${gk}/`;
 
-    const response = await axios.post(url, { headers });
+    const response = await axios.post(url, {}, { headers });
     const responseData = response.data;
 
     console.log(

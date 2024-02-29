@@ -395,7 +395,7 @@ const Orders = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("./assets/background-image-order.png")}
+        source={require("./assets/background-image_2.png")}
         style={styles.backgroundImage}
       />
       <View style={styles.contentContainer}>

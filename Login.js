@@ -54,7 +54,7 @@ const Login = ({ route }) => {
         style={styles.backgroundImage}
       />
       <View style={styles.formContainer}>
-        <Text style={styles.title}>Zaloguj się</Text>
+        <Text style={styles.title}>Sign in</Text>
         {!username && (
           <View style={styles.inputContainer}>
             <TextInput
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 300,
-    backgroundColor: "rgba(64, 35, 35, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     padding: 20,
     height: "100%",
   },
@@ -130,7 +130,8 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: 250,
     marginBottom: 15,
-    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#fff",
     borderRadius: 50,
   },
 
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     height: 30,
     paddingHorizontal: 20,
     borderRadius: 10,
-    color: "#000",
+    color: "#fff",
   },
 
   buttonContainers: {

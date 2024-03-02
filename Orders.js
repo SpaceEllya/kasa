@@ -213,10 +213,11 @@ const Orders = () => {
     }
   };
 
-  // Add Order
+  // Dodowanie zamówienia
 
   const handleAddOrder = async () => {
     try {
+      // Przesyłanie odebranych danych do pamięci masowej
       const requestData = {
         Order: orderDetails.Order,
         Dish: orderDetails.Dish,
@@ -224,8 +225,8 @@ const Orders = () => {
         Variant: orderDetails.Variant,
         note: orderDetails.note,
       };
-
-      const response = await kitchenOrderCreate(
+      // Przekazywanie danych do bazy danych
+      await kitchenOrderCreate(
         requestData.Order,
         requestData.Dish,
         requestData.counts,
@@ -233,8 +234,7 @@ const Orders = () => {
         requestData.note
       );
 
-      console.log("Response from the server:", response);
-
+      // Aktualizacja listy po dodaniu zamówienia
       await fetchOrdersDetails(0, 0);
       await getOrdersHasDishes(0, 0);
     } catch (error) {
@@ -395,12 +395,12 @@ const Orders = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("./assets/background-image_2.png")}
+        source={require("./assets/background-image-orders_2.png")}
         style={styles.backgroundImage}
       />
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <Image source={require("./assets/logo.png")} style={styles.logo} />
+          <Image source={require("./assets/logo.svg")} style={styles.logo} />
           <View style={styles.headerTextContainer}>
             <TouchableOpacity onPress={() => handleLinkPress("Orders")}>
               <Text
@@ -470,7 +470,7 @@ const Orders = () => {
 
             <TouchableOpacity onPress={toggleProfileModal}>
               <Image
-                source={require("./assets/user_profile.png")}
+                source={require("./assets/list.svg")}
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -559,6 +559,10 @@ const Orders = () => {
                       {!isBookingCancelled && (
                         <View style={styles.InfoBox}>
                           <View style={styles.additionalInfoBox}>
+                            <Image
+                              source={require("./assets/order-not-done.png")}
+                              style={styles.backgroundImageOrder}
+                            />
                             <View style={styles.additionalInfoBoxSecond}>
                               <View style={styles.itionalInfoBoxSecondInfo}>
                                 <View
@@ -686,6 +690,17 @@ const Orders = () => {
                               : styles.additionalInfoBox
                           }
                         >
+                          {item.done ? (
+                            <Image
+                              source={require("./assets/order-done.png")}
+                              style={styles.backgroundImageOrder}
+                            />
+                          ) : (
+                            <Image
+                              source={require("./assets/order-not-done.png")}
+                              style={styles.backgroundImageOrder}
+                            />
+                          )}
                           <View style={styles.additionalInfoBoxSecond}>
                             <View style={styles.itionalInfoBoxSecondInfo}>
                               <View style={styles.itionalInfoBoxSecondInfoflex}>
@@ -971,17 +986,19 @@ const Orders = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Dodowanie zamówienia */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={addOrderModalVisible}
-        onRequestClose={() => setAddOrderModalVisible(false)}
+        visible={addOrderModalVisible} // Otwieranie okna modalnego
+        onRequestClose={() => setAddOrderModalVisible(false)} // Zamknieńcie okna modalnego
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>New Order</Text>
 
-            <TextInput
+            <TextInput // Dodowanie id zamówienia
               style={styles.modalInput}
               placeholder="Order"
               value={selectedOrderId.toString()}
@@ -991,7 +1008,7 @@ const Orders = () => {
               }}
             />
 
-            <Picker
+            <Picker // Dodowanie dania
               style={styles.picker}
               selectedValue={orderDetails.Dish}
               onValueChange={(text) => {
@@ -1008,7 +1025,7 @@ const Orders = () => {
               ))}
             </Picker>
 
-            <TextInput
+            <TextInput // Dodowanie kwoty
               style={styles.modalInput}
               placeholder="Counts"
               value={orderDetails.counts}
@@ -1021,7 +1038,7 @@ const Orders = () => {
               }}
             />
 
-            <TextInput
+            <TextInput // Dodowanie uwag
               style={styles.modalInput}
               placeholder="Note"
               value={orderDetails.note}
@@ -1030,14 +1047,14 @@ const Orders = () => {
               }
             />
 
-            <Picker
+            <Picker // Dodowanie wariantów
               style={styles.picker}
               selectedValue={orderDetails.Variant}
               onValueChange={(text) =>
                 setOrderDetails({ ...orderDetails, Variant: text })
               }
             >
-              <Picker.Item label="Сhoose a variant" value={null} />{" "}
+              <Picker.Item label="Сhoose a variant" value={null} />
               {Variant.map((Variant) => (
                 <Picker.Item
                   key={Variant.id}
@@ -1073,6 +1090,18 @@ const styles = StyleSheet.create({
     height: 250,
     resizeMode: "cover",
     position: "absolute",
+  },
+  backgroundImageOrder: {
+    width: "100%",
+    height: 279,
+    resizeMode: "cover",
+    position: "absolute",
+    borderRadius: 10,
+
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "#000",
   },
 
   header: {
@@ -1112,10 +1141,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 20,
+    height: 20,
     marginLeft: 10,
-    borderRadius: 20,
   },
   userInfoContainer: {
     marginTop: 40,
@@ -1175,7 +1203,7 @@ const styles = StyleSheet.create({
   additionalInfoBox: {
     width: 393,
     height: 279,
-    backgroundColor: "#FA8E4D",
+    backgroundColor: "#EB8C34",
     marginTop: 20,
     borderRadius: 10,
 
@@ -1187,7 +1215,7 @@ const styles = StyleSheet.create({
   additionalInfoBoxDone: {
     width: 393,
     height: 279,
-    backgroundColor: "#33C426",
+    backgroundColor: "#98A21E",
     marginTop: 20,
     borderRadius: 10,
 
@@ -1293,10 +1321,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  modalCloseButton: {
-    color: "blue",
-    fontSize: 16,
-  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -1338,16 +1362,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalCloseButton: {
-    color: "blue",
+    color: "000",
     fontSize: 16,
   },
 
-  profileImage: {
-    width: 40,
-    height: 40,
-    marginLeft: 10,
-    borderRadius: 20,
-  },
   profileModalContainer: {
     flex: 1,
     justifyContent: "center",

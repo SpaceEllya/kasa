@@ -130,12 +130,12 @@ const Kitchen = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("./assets/background-image_2.png")}
+        source={require("./assets/background-image-orders_2.png")}
         style={styles.backgroundImage}
       />
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <Image source={require("./assets/logo.png")} style={styles.logo} />
+          <Image source={require("./assets/logo.svg")} style={styles.logo} />
           <View style={styles.headerTextContainer}>
             <TouchableOpacity onPress={() => handleLinkPress("Orders")}>
               <Text
@@ -206,7 +206,7 @@ const Kitchen = () => {
 
             <TouchableOpacity onPress={toggleProfileModal}>
               <Image
-                source={require("./assets/user_profile.png")}
+                source={require("./assets/list.svg")}
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -236,6 +236,10 @@ const Kitchen = () => {
           <Text style={styles.additionalInfoText}>List of kitchens</Text>
           <View style={styles.InfoBox}>
             <View style={styles.additionalInfoBox}>
+              <Image
+                source={require("./assets/background-image-kitchen.png")}
+                style={styles.backgroundImageOrder}
+              />
               <View style={styles.additionalInfoBoxSecond}>
                 <FlatList
                   data={Array.from(ordersMap.values()).flat()}
@@ -317,6 +321,18 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     position: "absolute",
   },
+  backgroundImageOrder: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+    position: "absolute",
+    borderRadius: 10,
+
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "#000",
+  },
   header: {
     justifyContent: "space-between",
     flexDirection: "row",
@@ -353,15 +369,14 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 20,
+    height: 20,
     marginLeft: 10,
-    borderRadius: 20,
   },
 
   orderItem: {
     maxWidth: 130,
-    minWidth: 130,
+
     fontSize: 16,
     marginBottom: 5,
   },
@@ -425,7 +440,7 @@ const styles = StyleSheet.create({
   },
 
   statusChangeButton: {
-    backgroundColor: "#FA8E4D",
+    backgroundColor: "#EB8C34",
     color: "white",
     padding: 10,
     borderRadius: 5,

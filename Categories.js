@@ -278,12 +278,12 @@ const Categories = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("./assets/category-img.png")}
+        source={require("./assets/background-image-category.png")}
         style={styles.backgroundImage}
       />
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <Image source={require("./assets/logo.png")} style={styles.logo} />
+          <Image source={require("./assets/logo.svg")} style={styles.logo} />
           <View style={styles.headerTextContainer}>
             <TouchableOpacity onPress={() => handleLinkPress("Orders")}>
               <Text
@@ -353,7 +353,7 @@ const Categories = () => {
 
             <TouchableOpacity onPress={toggleProfileModal}>
               <Image
-                source={require("./assets/user_profile.png")}
+                source={require("./assets/list.svg")}
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -438,15 +438,19 @@ const Categories = () => {
                   {!isBookingCancelled && (
                     <View style={styles.InfoBox}>
                       <View style={styles.additionalInfoBox}>
+                        <Image
+                          source={require("./assets/category.png")}
+                          style={styles.backgroundImageOrder}
+                        />
                         <View style={styles.additionalInfoBoxSecond}>
                           <View style={styles.itionalInfoBoxSecondInfo}>
                             <Image
-                              source={require("./assets/user_profile.png")}
+                              source={require("./assets/dish-icon.svg")}
                               style={
                                 styles.additionalInfoBoxSecondbackgroundImage
                               }
                             />
-                            <View style={styles.itionalInfoBoxSecondInfoText}>
+                            <View>
                               <Text style={styles.infoBoxSecondInfoText}>
                                 {item.name}
                               </Text>
@@ -692,10 +696,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 20,
+    height: 20,
     marginLeft: 10,
-    borderRadius: 20,
   },
   userInfoContainer: {
     marginTop: 40,
@@ -764,6 +767,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowColor: "#000",
   },
+  backgroundImageOrder: {
+    width: "100%",
+    height: 149,
+    resizeMode: "cover",
+    position: "absolute",
+    borderRadius: 10,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "#000",
+  },
 
   additionalInfoBoxSecond: {
     width: 393,
@@ -824,7 +838,7 @@ const styles = StyleSheet.create({
   },
 
   modalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
   modalContainer: {
@@ -864,12 +878,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  profileImage: {
-    width: 40,
-    height: 40,
-    marginLeft: 10,
-    borderRadius: 20,
-  },
   profileModalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -889,7 +897,7 @@ const styles = StyleSheet.create({
     color: "black",
   },
   profileModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
     marginTop: 10,
   },
@@ -923,7 +931,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   notificationModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
     marginTop: 10,
   },
@@ -957,7 +965,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modifyModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
   addContainer: {

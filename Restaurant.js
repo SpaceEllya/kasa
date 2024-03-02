@@ -209,7 +209,7 @@ const Restaurant = () => {
       name: item.name,
       сategory: item.Category,
       description: item.description,
-      Cost: item.Cost.toString(),
+      Cost: item.Cost,
       vat: item.vat.toString(),
     });
     setIsVisible(true);
@@ -483,12 +483,12 @@ const Restaurant = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("./assets/background-image_2.png")}
+        source={require("./assets/background-image-restaurant.png")}
         style={styles.backgroundImage}
       />
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <Image source={require("./assets/logo.png")} style={styles.logo} />
+          <Image source={require("./assets/logo.svg")} style={styles.logo} />
           <View style={styles.headerTextContainer}>
             <TouchableOpacity onPress={() => handleLinkPress("Orders")}>
               <Text
@@ -558,7 +558,7 @@ const Restaurant = () => {
 
             <TouchableOpacity onPress={toggleProfileModal}>
               <Image
-                source={require("./assets/user_profile.png")}
+                source={require("./assets/list.svg")}
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -621,6 +621,7 @@ const Restaurant = () => {
           </TouchableOpacity>
         </View>
       </View>
+
       <View style={styles.contentContainer}>
         {isMainOrdersVisible && (
           <>
@@ -640,13 +641,17 @@ const Restaurant = () => {
                       {!isBookingCancelled && (
                         <View style={styles.InfoBox}>
                           <View style={styles.additionalInfoBox}>
+                            <Image
+                              source={require("./assets/dishes.png")}
+                              style={styles.backgroundImageOrder}
+                            />
                             <View style={styles.additionalInfoBoxSecond}>
                               <View style={styles.itionalInfoBoxSecondInfo}>
                                 <View
                                   style={styles.itionalInfoBoxSecondInfoflex}
                                 >
                                   <Image
-                                    source={{ uri: item.D_img }}
+                                    source={require("./assets/dish-icon.svg")}
                                     style={
                                       styles.additionalInfoBoxSecondbackgroundImage
                                     }
@@ -778,11 +783,15 @@ const Restaurant = () => {
                     <View style={styles.additionalInfoContainer}>
                       <View style={styles.InfoBox}>
                         <View style={styles.additionalInfoBox}>
+                          <Image
+                            source={require("./assets/produkts.png")}
+                            style={styles.backgroundImageOrder}
+                          />
                           <View style={styles.additionalInfoBoxSecond}>
                             <View style={styles.itionalInfoBoxSecondInfo}>
                               <View style={styles.itionalInfoBoxSecondInfoflex}>
                                 <Image
-                                  source={require("./assets/order-dish.svg")}
+                                  source={require("./assets/dish-icon.svg")}
                                   style={
                                     styles.additionalInfoBoxSecondbackgroundImage
                                   }
@@ -864,13 +873,17 @@ const Restaurant = () => {
                       <View style={styles.additionalInfoContainer}>
                         <View style={styles.InfoBox}>
                           <View style={styles.additionalInfoBox}>
+                            <Image
+                              source={require("./assets/variants.png")}
+                              style={styles.backgroundImageOrder}
+                            />
                             <View style={styles.additionalInfoBoxSecond}>
                               <View style={styles.itionalInfoBoxSecondInfo}>
                                 <View
                                   style={styles.itionalInfoBoxSecondInfoflex}
                                 >
                                   <Image
-                                    source={require("./assets/order-dish.svg")}
+                                    source={require("./assets/dish-icon.svg")}
                                     style={
                                       styles.additionalInfoBoxSecondbackgroundImage
                                     }
@@ -1088,7 +1101,7 @@ const Restaurant = () => {
               style={styles.modalInput}
               placeholder="Cost"
               value={editedDish.Cost}
-              onChangeText={(text) => handleChangeText("Сost", text)}
+              onChangeText={(text) => handleChangeText("Cost", text)}
             />
             <TextInput
               style={styles.modalInput}
@@ -1192,31 +1205,31 @@ const Restaurant = () => {
               keyboardType="numeric"
               value={orderDetails.vat}
               onChangeText={(text) => {
-                // Удаляем все символы, кроме цифр и точки
+                // Usunięcie wszystkich znaków z wyjątkiem cyfr i kropki
                 let cleanedText = text.replace(/[^\d.]/g, "");
 
-                // Отделяем целую часть от дробной
+                // oddzielenie części całkowitej od części ułamkowej
                 let parts = cleanedText.split(".");
                 let integerPart = parts[0];
                 let decimalPart = parts[1] || "";
 
-                // Ограничиваем количество цифр в дробной части до двух
+                // ograniczenie liczby cyfr w części ułamkowej do dwóch
                 decimalPart = decimalPart.slice(0, 2);
 
-                // Объединяем целую и дробную части с добавлением точки
+                // Łączenie części całkowitej i ułamkowej przez dodanie kropki
                 let formattedText = integerPart
                   ? integerPart + "." + decimalPart
                   : text === "."
                   ? "0."
                   : "";
 
-                // Проверяем, если значение больше 1, то ограничиваем его до 1.00
+                // Sprawdzenie, czy wartość jest większa niż 1, a następnie ograniczenie jej do 1,00
                 let numberValue = parseFloat(formattedText);
                 if (numberValue > 1) {
                   formattedText = "1.00";
                 }
 
-                // Обновляем состояние компонента
+                // Aktualizacja stanu komponentu
                 setOrderDetails({ ...orderDetails, vat: formattedText });
               }}
             />
@@ -1333,7 +1346,6 @@ const Restaurant = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     width: "100%",
     height: "100%",
     alignItems: "center",
@@ -1389,10 +1401,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 20,
+    height: 20,
     marginLeft: 10,
-    borderRadius: 20,
   },
   userInfoContainer: {
     marginTop: 40,
@@ -1460,6 +1471,18 @@ const styles = StyleSheet.create({
     height: 279,
     backgroundColor: "#FA8E4D",
     marginTop: 20,
+    borderRadius: 10,
+
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "#000",
+  },
+  backgroundImageOrder: {
+    width: "100%",
+    height: 279,
+    resizeMode: "cover",
+    position: "absolute",
     borderRadius: 10,
 
     shadowOpacity: 0.1,
@@ -1571,7 +1594,7 @@ const styles = StyleSheet.create({
   },
 
   modalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
   modalContainer: {
@@ -1615,16 +1638,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
 
-  profileImage: {
-    width: 40,
-    height: 40,
-    marginLeft: 10,
-    borderRadius: 20,
-  },
   profileModalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -1644,7 +1661,7 @@ const styles = StyleSheet.create({
     color: "black",
   },
   profileModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
     marginTop: 10,
   },
@@ -1678,7 +1695,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   notificationModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
     marginTop: 10,
   },
@@ -1712,7 +1729,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modifyModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
   addContainer: {

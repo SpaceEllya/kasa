@@ -41,13 +41,17 @@ const Management = () => {
 
   // Add pracownikow
 
-  const [isUsersDetails, setUsersDetails] = useState([]);
   const [isMainOrdersVisible] = useState(true);
+
+  // Pobieranie całej listy użytkowników
+
+  const [isUsersDetails, setUsersDetails] = useState([]);
 
   const fetchUserDetails = async () => {
     try {
-      const userData = await getUsersDetails(0, 0);
+      const userData = await getUsersDetails(0, 0); // Pobieranie całej listy użytkowników
 
+      // Odczyt wszystkich informacji o użytkowniku
       const userDetails = userData.map((user) => ({
         first_name: user.first_name,
         last_name: user.last_name,
@@ -55,18 +59,18 @@ const Management = () => {
         phone_no: user.phone_no,
         hired_time: user.hired_time,
         fired_time: user.fired_time,
-        last_login: formatTimeString(user.last_login),
+        last_login: formatTimeString(user.last_login), // Formatowanie odebranego czasu
         email: user.email,
         id: user.id,
       }));
-
+      // Dodawanie otrzymanych danych do repozytorium
       setUsersDetails(userDetails);
     } catch (error) {
       console.error("Error while retrieving user data:", error);
     }
   };
   useEffect(() => {
-    fetchUserDetails();
+    fetchUserDetails(); // Pobieranie danych
   }, []);
 
   const [isProfileModalVisible, setProfileModalVisible] = useState(false);
@@ -325,11 +329,14 @@ const Management = () => {
     </TouchableOpacity>
   );
 
+  // Usunięcie użytkownika z grupy
+
   const handleRightArrowPressUserGroup = async () => {
     try {
+      // Określamy grupę, dane użytkownika i id użytkownika
       if (!selectedGroup || !selectedItemUserGroup || !selectedItemUserGroup.id)
         return;
-
+      // Określamy id użytkownika
       const { id: userId } = selectedItemUserGroup;
 
       await RemoveUserFromGroup(userId, groupId); // Usunięcie użytkownika z grupy
@@ -341,28 +348,33 @@ const Management = () => {
       // Aktualizacja listy użytkowników spoza grupy
       const updatedGroupUsersNotInGroup = await fetchGroupUsers(groupId, false);
       setGroupUsersNotInGroup(updatedGroupUsersNotInGroup);
-
+      // Aktualizacja listy
       setSelectedItemUserGroup(null);
     } catch (error) {
       console.error("Error removing user from group:", error);
     }
   };
 
+  // Dodowanie użytkownika do grupy
+
   const handleLeftArrowPressUserGroup = async () => {
     try {
+      // Określamy grupę, dane użytkownika i id użytkownika
       if (!selectedGroup || !selectedItemUserGroup || !selectedItemUserGroup.id)
         return;
-
+      // Określamy id użytkownika
       const { id: userId } = selectedItemUserGroup;
 
-      await AddUserToGroup(userId, groupId);
+      await AddUserToGroup(userId, groupId); // Dodowanie użytkownika do grupy
 
+      // Aktualizacja listy użytkowników w grupie
       const updatedGroupUsersInGroup = await fetchGroupUsers(groupId, true);
       setGroupUsersInGroup(updatedGroupUsersInGroup);
 
+      // Aktualizacja listy użytkowników spoza grupy
       const updatedGroupUsersNotInGroup = await fetchGroupUsers(groupId, false);
       setGroupUsersNotInGroup(updatedGroupUsersNotInGroup);
-
+      // Aktualizacja listy
       setSelectedItemUserGroup(null);
     } catch (error) {
       console.error("Error adding user to group:", error);
@@ -687,12 +699,12 @@ const Management = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("./assets/background-image_2.png")}
+        source={require("./assets/background-image-management.png")}
         style={styles.backgroundImage}
       />
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <Image source={require("./assets/logo.png")} style={styles.logo} />
+          <Image source={require("./assets/logo.svg")} style={styles.logo} />
           <View style={styles.headerTextContainer}>
             <TouchableOpacity onPress={() => handleLinkPress("Orders")}>
               <Text
@@ -762,7 +774,7 @@ const Management = () => {
 
             <TouchableOpacity onPress={toggleProfileModal}>
               <Image
-                source={require("./assets/user_profile.png")}
+                source={require("./assets/list.svg")}
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -840,13 +852,17 @@ const Management = () => {
                       {!isBookingCancelled && (
                         <View style={styles.InfoBox}>
                           <View style={styles.additionalInfoBox}>
+                            <Image
+                              source={require("./assets/management.png")}
+                              style={styles.backgroundImageOrder}
+                            />
                             <View style={styles.additionalInfoBoxSecond}>
                               <View style={styles.itionalInfoBoxSecondInfo}>
                                 <View
                                   style={styles.itionalInfoBoxSecondInfoflex}
                                 >
                                   <Image
-                                    source={require("./assets/user_profile.png")}
+                                    source={require("./assets/management-user.png")}
                                     style={
                                       styles.additionalInfoBoxSecondbackgroundImage
                                     }
@@ -1541,10 +1557,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 20,
+    height: 20,
     marginLeft: 10,
-    borderRadius: 20,
   },
   userInfoContainer: {
     marginTop: 40,
@@ -1617,6 +1632,18 @@ const styles = StyleSheet.create({
     height: 328,
     backgroundColor: "#FA8E4D",
     marginTop: 20,
+    borderRadius: 10,
+
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "#000",
+  },
+  backgroundImageOrder: {
+    width: "100%",
+    height: 328,
+    resizeMode: "cover",
+    position: "absolute",
     borderRadius: 10,
 
     shadowOpacity: 0.1,
@@ -1698,7 +1725,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#DC702F",
+    borderBottomColor: "#fff",
     paddingBottom: 15,
   },
   additionalInfoBoxEditTwo: {
@@ -1748,7 +1775,7 @@ const styles = StyleSheet.create({
   },
 
   modalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
   modalContainer: {
@@ -1769,7 +1796,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     alignItems: "center",
-    width: "60%", // Увеличил ширину до 80%
+    width: "60%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
@@ -1799,16 +1826,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
 
-  profileImage: {
-    width: 40,
-    height: 40,
-    marginLeft: 10,
-    borderRadius: 20,
-  },
   profileModalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -1825,10 +1846,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "light",
     marginBottom: 10,
-    color: "black", // Цвет ссылок (можете настроить под ваш дизайн)
+    color: "black",
   },
   profileModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
     marginTop: 10,
   },
@@ -1862,7 +1883,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   notificationModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
     marginTop: 10,
   },
@@ -1896,7 +1917,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modifyModalCloseButton: {
-    color: "blue",
+    color: "black",
     fontSize: 16,
   },
   addContainer: {

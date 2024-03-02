@@ -90,11 +90,8 @@ const Restaurant = () => {
   // Get dish
 
   const [dishes, setDishes] = useState([]);
-  const [subProducts, setSubProducts] = useState([]);
 
-  const [subVariants, setSubVariants] = useState([]);
   const [isMainOrdersVisible, setIsMainOrdersVisible] = useState(true);
-  const [isSubOrdersVisible, setIsSubOrdersVisible] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -112,25 +109,46 @@ const Restaurant = () => {
   // Get products
 
   const [selectedOrderId, setSelectedOrderId] = useState("");
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedVariants, setSelectedVariants] = useState([]);
+  const [isSubOrdersVisible, setIsSubOrdersVisible] = useState(false);
+  const [isVariantsOrdersVisible, setIsVariantsOrdersVisible] = useState(false);
 
   const handleCategorySelect = async (D_no) => {
     try {
       const getProducts = await getDishesProducts(0, D_no);
       const getVariants = await getDishesVariants(0, D_no);
 
-      // Zapisywanie otrzymanych danych o potrawach i wariantach w stanie
-      setDishes(getProducts);
-      setSubProducts(getProducts);
-      setSubVariants(getVariants);
+      setSelectedProducts(getProducts);
+      setSelectedVariants(getVariants);
       setSelectedOrderId(D_no.toString());
-
-      // Pokazywanie zamówień podrzędnych i wariantów
-      setIsMainOrdersVisible(false);
-      setIsSubOrdersVisible(true);
+      setIsCategoryModalVisible(true);
     } catch (error) {
       console.error("Error while receiving orders:", error);
     }
   };
+
+  const handleCategoryProductsPress = async () => {
+    try {
+      setIsCategoryModalVisible(false);
+      setIsMainOrdersVisible(false);
+      setIsSubOrdersVisible(true);
+    } catch (error) {
+      console.error("Error while handling category products:", error);
+    }
+  };
+
+  const handleCategoryVariantsPress = async () => {
+    try {
+      setIsCategoryModalVisible(false);
+      setIsMainOrdersVisible(false);
+      setIsVariantsOrdersVisible(true);
+    } catch (error) {
+      console.error("Error while handling category variants:", error);
+    }
+  };
+  const handleSsubProductsSelect = () => {};
 
   //Add dish
 
@@ -210,7 +228,7 @@ const Restaurant = () => {
       сategory: item.Category,
       description: item.description,
       Cost: item.Cost,
-      vat: item.vat.toString(),
+      vat: item.vat,
     });
     setIsVisible(true);
   };
@@ -412,7 +430,9 @@ const Restaurant = () => {
     setIsMainOrdersVisible(true);
     // Ukryj podzamówienia
     setIsSubOrdersVisible(false);
-    setSubProducts([]);
+    setIsVariantsOrdersVisible(false);
+    setSelectedProducts([]);
+    setSelectedVariants([]);
     // Aktualizacja danych dania
     await fetchData();
   };
@@ -773,7 +793,7 @@ const Restaurant = () => {
 
             <View style={styles.addContainer}>
               <FlatList
-                data={subProducts}
+                data={selectedProducts}
                 horizontal={true}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
@@ -857,104 +877,128 @@ const Restaurant = () => {
             </View>
           </>
         )}
-        {isSubOrdersVisible && (
+        {isVariantsOrdersVisible && (
           <>
-            <View style={styles.contentContainerTwo}>
-              <Text style={styles.additionalInfoTextVariants}>Variants</Text>
-              <View style={styles.addContainer}>
-                <FlatList
-                  data={subVariants}
-                  horizontal={true}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      onPress={() => handleSsubProductsSelect(item)}
-                    >
-                      <View style={styles.additionalInfoContainer}>
-                        <View style={styles.InfoBox}>
-                          <View style={styles.additionalInfoBox}>
-                            <Image
-                              source={require("./assets/variants.png")}
-                              style={styles.backgroundImageOrder}
-                            />
-                            <View style={styles.additionalInfoBoxSecond}>
-                              <View style={styles.itionalInfoBoxSecondInfo}>
+            <Text style={styles.additionalInfoText}>Variants</Text>
+            <TouchableOpacity
+              onPress={handleGoBack}
+              style={styles.containergoBackButton}
+            >
+              <Text style={styles.goBackButton}>Back</Text>
+            </TouchableOpacity>
+
+            <View style={styles.addContainer}>
+              <FlatList
+                data={selectedVariants}
+                horizontal={true}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => handleSsubProductsSelect(item)}
+                  >
+                    <View style={styles.additionalInfoContainer}>
+                      <View style={styles.InfoBox}>
+                        <View style={styles.additionalInfoBox}>
+                          <Image
+                            source={require("./assets/variants.png")}
+                            style={styles.backgroundImageOrder}
+                          />
+                          <View style={styles.additionalInfoBoxSecond}>
+                            <View style={styles.itionalInfoBoxSecondInfo}>
+                              <View style={styles.itionalInfoBoxSecondInfoflex}>
+                                <Image
+                                  source={require("./assets/dish-icon.svg")}
+                                  style={
+                                    styles.additionalInfoBoxSecondbackgroundImage
+                                  }
+                                />
                                 <View
-                                  style={styles.itionalInfoBoxSecondInfoflex}
+                                  style={styles.itionalInfoBoxSecondInfoText}
                                 >
-                                  <Image
-                                    source={require("./assets/dish-icon.svg")}
-                                    style={
-                                      styles.additionalInfoBoxSecondbackgroundImage
-                                    }
-                                  />
-                                  <View
-                                    style={styles.itionalInfoBoxSecondInfoText}
+                                  <Text style={styles.infoBoxSecondInfoText}>
+                                    {item.Variant_no}
+                                  </Text>
+                                  <Text
+                                    style={styles.infoBoxSecondInfoTextSecond}
                                   >
-                                    <Text style={styles.infoBoxSecondInfoText}>
-                                      {item.Variant_no}
-                                    </Text>
-                                    <Text
-                                      style={styles.infoBoxSecondInfoTextSecond}
-                                    >
-                                      Dish: {item.Dish}
-                                    </Text>
-                                  </View>
+                                    Dish: {item.Dish}
+                                  </Text>
                                 </View>
                               </View>
-                              <View
-                                style={styles.additionalInfoBoxSecondRowTwo}
+                            </View>
+                            <View style={styles.additionalInfoBoxSecondRowTwo}>
+                              <View>
+                                <Text
+                                  style={styles.infoBoxSecondInfoTextRowTwo}
+                                >
+                                  Count
+                                </Text>
+                                <Text
+                                  style={
+                                    styles.infoBoxSecondInfoTextSecondRowTwo
+                                  }
+                                >
+                                  {item.count}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                          <View style={styles.additionalInfoBoxEdit}>
+                            <>
+                              <TouchableOpacity
+                                onPress={() => handleDeleteVariant(item)}
                               >
-                                <View>
-                                  <Text
-                                    style={styles.infoBoxSecondInfoTextRowTwo}
-                                  >
-                                    Count
-                                  </Text>
-                                  <Text
-                                    style={
-                                      styles.infoBoxSecondInfoTextSecondRowTwo
-                                    }
-                                  >
-                                    {item.count}
-                                  </Text>
-                                </View>
-                              </View>
-                            </View>
-                            <View style={styles.additionalInfoBoxEdit}>
-                              <>
-                                <TouchableOpacity
-                                  onPress={() => handleDeleteVariant(item)}
+                                <Text
+                                  style={styles.additionalInfoBoxEditSecond}
                                 >
-                                  <Text
-                                    style={styles.additionalInfoBoxEditSecond}
-                                  >
-                                    Delete
-                                  </Text>
-                                </TouchableOpacity>
-                              </>
-                            </View>
+                                  Delete
+                                </Text>
+                              </TouchableOpacity>
+                            </>
                           </View>
                         </View>
                       </View>
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-              <View style={styles.buttonContainerVariant}>
-                <TouchableOpacity
-                  onPress={toggleSubVariantssModal}
-                  style={styles.changeUserButtonTwo}
-                >
-                  <Text style={styles.changeUserButtonTextTwo}>
-                    Add Variant
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+            <View style={styles.buttonContainerVariant}>
+              <TouchableOpacity
+                onPress={toggleSubVariantssModal}
+                style={styles.changeUserButtonTwo}
+              >
+                <Text style={styles.changeUserButtonTextTwo}>Add Variant</Text>
+              </TouchableOpacity>
             </View>
           </>
         )}
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isCategoryModalVisible}
+        onRequestClose={() => setIsCategoryModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Products or Variants</Text>
+
+            <TouchableOpacity onPress={handleCategoryProductsPress}>
+              <Text style={styles.modifyModalSaveButton}>Products</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleCategoryVariantsPress}>
+              <Text style={styles.modifyModalSaveButton}>Variants</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => setIsCategoryModalVisible(false)}>
+              <Text style={styles.modalButton}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         animationType="slide"
